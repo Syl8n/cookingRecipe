@@ -12,7 +12,6 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
-import org.springframework.stereotype.Service;
 import zerobase.group2.cookingRecipe.member.type.MemberStatus;
 
 @Getter
@@ -30,9 +29,9 @@ public class Member {
     @Enumerated(EnumType.STRING)
     MemberStatus status;
 
-    String email_auth_key;
-    LocalDateTime email_auth_dt;
-    boolean email_auth_yn;
+    String emailAuthKey;
+    LocalDateTime emailAuthDue;
+    boolean emailAuthYn;
 
     @CreatedDate
     LocalDateTime registeredAt;
