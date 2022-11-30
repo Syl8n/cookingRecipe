@@ -1,52 +1,59 @@
 package zerobase.group2.cookingRecipe.member.service;
 
-import static zerobase.group2.cookingRecipe.member.type.MemberError.DATA_NOT_VALID;
-import static zerobase.group2.cookingRecipe.member.type.MemberError.EMAIL_ALREADY_REGISTERED;
-import static zerobase.group2.cookingRecipe.member.type.MemberError.INTERNAL_SERVER_ERROR;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
-import org.elasticsearch.monitor.os.OsStats.Mem;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.User;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCrypt;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import zerobase.group2.cookingRecipe.member.component.MailComponent;
-import zerobase.group2.cookingRecipe.member.dto.MemberRegister;
+import zerobase.group2.cookingRecipe.member.dto.MemberDto;
 import zerobase.group2.cookingRecipe.member.dto.MemberRegister.Request;
 import zerobase.group2.cookingRecipe.member.entity.Member;
 import zerobase.group2.cookingRecipe.member.exception.MemberException;
 import zerobase.group2.cookingRecipe.member.repository.MemberRepository;
-import zerobase.group2.cookingRecipe.member.type.MemberError;
+
 import zerobase.group2.cookingRecipe.member.type.MemberStatus;
+import zerobase.group2.cookingRecipe.type.ErrorCode;
 
 @Service
 @Transactional
 @RequiredArgsConstructor
-public class MemberService {
+public class MemberService implements UserDetailsService {
     private final MemberRepository memberRepository;
     private final MailComponent mailComponent;
 
-    public void register(Request request) {
+    public MemberDto register(Request request) {
         memberRepository.findById(request.getEmail())
             .ifPresent(e -> {
-                throw new MemberException(EMAIL_ALREADY_REGISTERED);
+                throw new MemberException(ErrorCode.EMAIL_ALREADY_REGISTERED);
             });
 
         String uuid = UUID.randomUUID().toString();
 
-        memberRepository.save(Member.builder()
-                .email(request.getEmail())
-                .name(request.getName())
-                .password(hashedPassword(request.getPassword()))
-                .emailAuthDue(LocalDateTime.now())
-                .emailAuthKey(uuid)
-                .emailAuthYn(false)
-                .status(MemberStatus.BEFORE_AUTH)
-                .build());
+        Member member = memberRepository.save(Member.builder()
+            .email(request.getEmail())
+            .name(request.getName())
+            .password(hashedPassword(request.getPassword()))
+            .emailAuthDue(LocalDateTime.now().plusHours(1))
+            .emailAuthKey(uuid)
+            .emailAuthYn(false)
+            .status(MemberStatus.BEFORE_AUTH)
+            .build());
 
         sendEmail(request.getEmail(), uuid);
+
+        return MemberDto.from(member);
     }
 
     private void sendEmail(String email, String uuid) {
@@ -61,21 +68,41 @@ public class MemberService {
         return BCrypt.hashpw(password, BCrypt.gensalt());
     }
 
-    public void emailAuth(String uuid) {
-        Member member = memberRepository.findByEmailAuthKey(uuid)
-            .orElseThrow(() -> new MemberException(DATA_NOT_VALID));
+    public boolean emailAuth(String key) {
+        Member member = memberRepository.findByEmailAuthKey(key)
+            .orElseThrow(() -> new MemberException(ErrorCode.DATA_NOT_VALID));
 
         if (member.isEmailAuthYn()) {
-            throw new MemberException(INTERNAL_SERVER_ERROR);
+            throw new MemberException(ErrorCode.ACCESS_NOT_VALID);
         }
 
         if (LocalDateTime.now().isAfter(member.getEmailAuthDue())){
-            throw new MemberException(INTERNAL_SERVER_ERROR);
+            throw new MemberException(ErrorCode.ACCESS_NOT_VALID);
         }
 
         member.setStatus(MemberStatus.IN_USE);
         member.setEmailAuthYn(true);
         member.setEmailAuthDue(LocalDateTime.now());
         memberRepository.save(member);
+
+        return member.isEmailAuthYn();
     }
+
+    @Override
+    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+        Member member = memberRepository.findById(username)
+            .orElseThrow(() -> new UsernameNotFoundException("회원 정보가 존재하지 않습니다."));
+
+//        validate(member);
+
+        List<GrantedAuthority> grantedAuthorities = new ArrayList<>();
+        grantedAuthorities.add(new SimpleGrantedAuthority("ROLE_USER"));
+
+//        if (member.isAdminYn()) {
+//            grantedAuthorities.add(new SimpleGrantedAuthority("ROLE_ADMIN"));
+//        }
+
+        return new User(member.getEmail(), member.getPassword(), grantedAuthorities);
+    }
+
 }
