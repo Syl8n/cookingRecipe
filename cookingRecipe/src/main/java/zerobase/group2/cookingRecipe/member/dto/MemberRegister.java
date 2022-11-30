@@ -1,10 +1,12 @@
 package zerobase.group2.cookingRecipe.member.dto;
 
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Size;
+import javax.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.util.MultiValueMap;
 
 public class MemberRegister {
 
@@ -12,16 +14,14 @@ public class MemberRegister {
     @Setter
     @AllArgsConstructor
     public static class Request {
-        @NotNull
-        @Size(min = 11, max = 25)
+        @NotBlank
         private String email;
 
-        @NotNull
-        @Size(min = 8, max = 25)
+        @NotBlank
         private String password;
 
-        @NotNull
-        @Size(min = 2)
+        @NotBlank
         private String name;
     }
+
 }

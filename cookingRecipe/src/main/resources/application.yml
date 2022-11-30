@@ -1,9 +1,9 @@
 spring:
-#  datasource:
-#    url: jdbc:mariadb://127.0.0.1:3306/{DB NAME}
-#    driver-class-name: org.mariadb.jdbc.Driver
-#    username: {USERNAME}
-#    password: {PW}
+  datasource:
+    url: jdbc:mariadb://43.200.140.113:3306/cooking_recipe
+    driver-class-name: org.mariadb.jdbc.Driver
+    username: zerobase
+    password: zerobase
   jpa:
     generate-ddl: true
     hibernate:
@@ -13,7 +13,7 @@ spring:
     host: smtp.gmail.com
     port: 587
     username: ez.cooking.recipe@gmail.com
-    password: likvvrcgpxiqqnpc
+    password: djltetiwerymmftq
     properties:
       mail:
         smtp:
