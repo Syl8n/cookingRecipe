@@ -35,5 +35,6 @@ public class MemberController {
             .status(StatusCode.OK.getCode())
             .body(result)
             .build();
+
     }
 }

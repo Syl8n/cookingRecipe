@@ -22,6 +22,7 @@ import zerobase.group2.cookingRecipe.member.dto.MemberRegister.Request;
 import zerobase.group2.cookingRecipe.member.entity.Member;
 import zerobase.group2.cookingRecipe.member.exception.MemberException;
 import zerobase.group2.cookingRecipe.member.repository.MemberRepository;
+
 import zerobase.group2.cookingRecipe.member.type.MemberStatus;
 import zerobase.group2.cookingRecipe.type.ErrorCode;
 

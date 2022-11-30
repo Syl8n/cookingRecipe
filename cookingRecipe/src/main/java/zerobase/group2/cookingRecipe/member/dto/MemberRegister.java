@@ -23,5 +23,4 @@ public class MemberRegister {
         @NotBlank
         private String name;
     }
-
 }
