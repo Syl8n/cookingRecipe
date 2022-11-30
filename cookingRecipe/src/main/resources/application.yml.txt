@@ -1,0 +1,21 @@
+spring:
+  datasource:
+    url: jdbc:mariadb://{원격 IP}/{DB 이름}
+    driver-class-name: org.mariadb.jdbc.Driver
+    username: {계정 id}
+    password: {계정 pw}
+  jpa:
+    generate-ddl: true
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: {mail 주소 입력}
+    password: {mail code 입력}
+    properties:
+      mail:
+        smtp:
+          starttls:
+            enable: true
