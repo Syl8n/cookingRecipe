@@ -44,7 +44,7 @@ public class MemberService implements UserDetailsService {
         Member member = memberRepository.save(Member.builder()
             .email(request.getEmail())
             .name(request.getName())
-            .password(hashedPassword(request.getPassword()))
+            .password(hashedPassword(request.getPassword(), BCrypt.gensalt()))
             .emailAuthDue(LocalDateTime.now().plusHours(1))
             .emailAuthKey(uuid)
             .emailAuthYn(false)
@@ -64,8 +64,8 @@ public class MemberService implements UserDetailsService {
         mailComponent.sendMail(email, subject, text);
     }
 
-    private String hashedPassword(String password) {
-        return BCrypt.hashpw(password, BCrypt.gensalt());
+    private String hashedPassword(String password, String salt) {
+        return BCrypt.hashpw(password, salt);
     }
 
     public boolean emailAuth(String key) {
@@ -110,7 +110,7 @@ public class MemberService implements UserDetailsService {
 
     private Member getMemberById(String email) {
         return memberRepository.findById(email)
-            .orElseThrow(() -> new UsernameNotFoundException("회원 정보가 존재하지 않습니다."));
+            .orElseThrow(() -> new MemberException(ErrorCode.USER_NOT_FOUND));
     }
 
     public MemberDto editMemberInfo(String email, EditMemberInfo.Request request) {
@@ -123,19 +123,21 @@ public class MemberService implements UserDetailsService {
     public boolean editPassword(String email, EditPassword.Request request) {
         Member member = getMemberById(email);
 
-        if(member.validatePassword(hashedPassword(request.getOldPassword()))){
+        if(member.validatePassword(hashedPassword(request.getOldPassword(), member.getPassword()))){
             throw new MemberException(ErrorCode.DATA_NOT_VALID);
         }
 
-        member.setPassword(hashedPassword(request.getNewPassword()));
+        member.setPassword(hashedPassword(request.getNewPassword(), BCrypt.gensalt()));
         memberRepository.save(member);
-        return true;
+        return !member.validatePassword(hashedPassword(
+            request.getNewPassword(), member.getPassword()
+        ));
     }
 
     public boolean withdraw(String email, String password) {
         Member member = getMemberById(email);
 
-        if(member.validatePassword(hashedPassword(password))){
+        if(member.validatePassword(hashedPassword(password, member.getPassword()))){
             throw new MemberException(ErrorCode.DATA_NOT_VALID);
         }
 
@@ -148,8 +150,12 @@ public class MemberService implements UserDetailsService {
     public boolean sendResetEmail(String email) {
         Member member = getMemberById(email);
 
-        member.setEmailAuthKey(UUID.randomUUID().toString());
-        member.setEmailAuthDue(LocalDateTime.now().plusMinutes(10));
+        if(member.validateKeyAndDue()){
+            throw new MemberException(ErrorCode.ACCESS_NOT_VALID);
+        }
+
+        member.setPasswordAuthKey(UUID.randomUUID().toString());
+        member.setPasswordAuthDue(LocalDateTime.now().plusMinutes(10));
         memberRepository.save(member);
 
         sendResetEmail(member.getEmail(), member.getEmailAuthKey());
@@ -175,6 +181,7 @@ public class MemberService implements UserDetailsService {
 
         member.setPasswordAuthKey("");
         member.setPasswordAuthDue(LocalDateTime.now());
+        member.setEmailAuthYn(true);
         memberRepository.save(member);
 
         return member.getEmail();
@@ -183,7 +190,7 @@ public class MemberService implements UserDetailsService {
     public boolean resetProcess(String email, String password) {
         Member member = getMemberById(email);
 
-        member.setPassword(hashedPassword(password));
+        member.setPassword(hashedPassword(password, BCrypt.gensalt()));
         memberRepository.save(member);
 
         return true;

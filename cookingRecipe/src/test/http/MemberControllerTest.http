@@ -8,7 +8,7 @@ POST http://localhost:8080/member/register
 Content-Type: application/json
 
 {
-  "email" : "magi8520@gmail.com",
+  "email" : "magi85205@gmail.com",
   "password" : "1234",
   "name" : "aa"
 }

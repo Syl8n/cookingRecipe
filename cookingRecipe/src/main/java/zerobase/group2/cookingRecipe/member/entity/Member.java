@@ -1,6 +1,7 @@
 package zerobase.group2.cookingRecipe.member.entity;
 
 import java.time.LocalDateTime;
+import java.util.Objects;
 import javax.persistence.Entity;
 import javax.persistence.EntityListeners;
 import javax.persistence.EnumType;
@@ -48,5 +49,10 @@ public class Member {
 
     public boolean validatePassword(String pw){
         return !password.equals(pw);
+    }
+
+    public boolean validateKeyAndDue() {
+        return !Objects.isNull(passwordAuthKey) && passwordAuthKey.length() > 0 &&
+            LocalDateTime.now().isBefore(passwordAuthDue);
     }
 }

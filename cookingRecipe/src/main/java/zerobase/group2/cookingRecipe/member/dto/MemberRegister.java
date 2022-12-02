@@ -24,6 +24,8 @@ public class MemberRegister {
         private String name;
     }
 
+    @Getter
+    @Setter
     @NoArgsConstructor
     @AllArgsConstructor
     @Builder
