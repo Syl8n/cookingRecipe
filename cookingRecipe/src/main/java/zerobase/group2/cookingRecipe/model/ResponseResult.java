@@ -13,6 +13,13 @@ import zerobase.group2.cookingRecipe.type.StatusCode;
 @AllArgsConstructor
 @Builder
 public class ResponseResult {
-    private int status;
+    private StatusCode status;
     private Object body;
+
+    public static ResponseResult ok(Object obj){
+        return ResponseResult.builder()
+            .status(StatusCode.OK)
+            .body(obj)
+            .build();
+    }
 }

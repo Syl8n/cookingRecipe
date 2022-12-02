@@ -1,6 +1,5 @@
 package zerobase.group2.cookingRecipe.member.controller;
 
-import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.BDDMockito.given;
@@ -10,9 +9,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-
 import java.util.UUID;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,13 +17,13 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.transaction.annotation.Transactional;
 import zerobase.group2.cookingRecipe.member.dto.MemberDto;
 import zerobase.group2.cookingRecipe.member.dto.MemberRegister;
 import zerobase.group2.cookingRecipe.member.service.MemberService;
 
 @WebMvcTest(MemberController.class)
 class MemberControllerTest {
+
     @MockBean
     private MemberService memberService;
 
@@ -39,24 +36,22 @@ class MemberControllerTest {
     @Test
     void successRegister() throws Exception {
         //given
-        String uuid = UUID.randomUUID().toString();
         given(memberService.register(any()))
             .willReturn(MemberDto.builder()
                 .email("group2@gmail.com")
                 .name("그룹2")
-                .key(uuid)
                 .build()
             );
         //when
         //then
         mockMvc.perform(post("/member/register")
-            .contentType(MediaType.APPLICATION_JSON)
-            .content(objectMapper.writeValueAsString(
-                new MemberRegister.Request("email", "pw", "name")
-            )))
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(
+                    new MemberRegister.Request("email", "pw", "name")
+                )))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.body.email").value("group2@gmail.com"))
-            .andExpect(jsonPath("$.body.key").value(uuid))
+            .andExpect(jsonPath("$.body.name").value("그룹2"))
             .andDo(print());
     }
 

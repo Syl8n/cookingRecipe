@@ -36,8 +36,17 @@ public class Member {
     LocalDateTime emailAuthDue;
     boolean emailAuthYn;
 
+    String passwordAuthKey;
+    LocalDateTime passwordAuthDue;
+
+    boolean admin;
+
     @CreatedDate
     LocalDateTime registeredAt;
     @LastModifiedDate
     LocalDateTime updatedAt;
+
+    public boolean validatePassword(String pw){
+        return !password.equals(pw);
+    }
 }
