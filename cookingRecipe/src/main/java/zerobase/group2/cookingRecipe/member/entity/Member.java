@@ -37,8 +37,8 @@ public class Member {
     LocalDateTime emailAuthDue;
     boolean emailAuthYn;
 
-    String passwordAuthKey;
-    LocalDateTime passwordAuthDue;
+    String passwordResetKey;
+    LocalDateTime passwordResetDue;
 
     boolean admin;
 
@@ -52,7 +52,7 @@ public class Member {
     }
 
     public boolean validateKeyAndDue() {
-        return !Objects.isNull(passwordAuthKey) && passwordAuthKey.length() > 0 &&
-            LocalDateTime.now().isBefore(passwordAuthDue);
+        return !Objects.isNull(passwordResetKey) && passwordResetKey.length() > 0 &&
+            LocalDateTime.now().isBefore(passwordResetDue);
     }
 }

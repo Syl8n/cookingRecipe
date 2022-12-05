@@ -103,10 +103,11 @@ class MemberServiceTest {
         given(memberRepository.findByEmailAuthKey(anyString()))
             .willReturn(Optional.of(member));
         //when
-        boolean result = memberService.emailAuth(member.getEmailAuthKey());
+        memberService.emailAuth(member.getEmailAuthKey());
 
         //then
-        assertTrue(result);
+        assertTrue(member.isEmailAuthYn());
+        assertEquals(MemberStatus.IN_USE, member.getStatus());
     }
 
     @Test
@@ -213,9 +214,9 @@ class MemberServiceTest {
         given(memberRepository.findById(anyString()))
             .willReturn(Optional.of(member));
         //when
-        boolean result = memberService.editPassword("1", request);
+        memberService.editPassword("1", request);
         //then
-        assertTrue(result);
+        assertEquals(BCrypt.hashpw(request.getNewPassword(), member.getPassword()), member.getPassword());
     }
 
     @Test
@@ -253,9 +254,10 @@ class MemberServiceTest {
         given(memberRepository.findById(anyString()))
             .willReturn(Optional.of(member));
         //when
-        boolean result = memberService.withdraw("1", "1111");
+        memberService.withdraw("1", "1111");
         //then
-        assertTrue(result);
+        assertEquals("탈퇴회원", member.getName());
+        assertEquals(MemberStatus.WITHDRAW, member.getStatus());
     }
 
     @Test
@@ -287,16 +289,16 @@ class MemberServiceTest {
     @DisplayName("비밀번호 초기화 키 발급 성공")
     void success_sendResetEmail() {
         //given
-        member.setPasswordAuthKey("");
-        member.setPasswordAuthDue(LocalDateTime.now().minusDays(1));
+        member.setPasswordResetKey("");
+        member.setPasswordResetDue(LocalDateTime.now().minusDays(1));
         given(memberRepository.findById(anyString()))
             .willReturn(Optional.of(member));
         //when
-        boolean result = memberService.sendResetEmail("1");
+        boolean result = memberService.sendEmailToResetPassword("1");
         //then
         assertTrue(result);
-        assertTrue(LocalDateTime.now().isBefore(member.getPasswordAuthDue()));
-        assertNotEquals("", member.getPasswordAuthKey());
+        assertTrue(LocalDateTime.now().isBefore(member.getPasswordResetDue()));
+        assertNotEquals("", member.getPasswordResetKey());
     }
 
     @Test
@@ -305,7 +307,7 @@ class MemberServiceTest {
         //given
         //when
         MemberException exception = assertThrows(MemberException.class, () ->
-            memberService.sendResetEmail("1"));
+            memberService.sendEmailToResetPassword("1"));
         //then
         assertEquals(ErrorCode.USER_NOT_FOUND, exception.getError());
     }
@@ -314,13 +316,13 @@ class MemberServiceTest {
     @DisplayName("비밀번호 초기화 키 발급 실패 - 유효한 키 이미 존재")
     void fail_sendResetEmail_keyAlreadyIssued() {
         //given
-        member.setPasswordAuthKey(UUID.randomUUID().toString());
-        member.setPasswordAuthDue(LocalDateTime.now().plusHours(1));
+        member.setPasswordResetKey(UUID.randomUUID().toString());
+        member.setPasswordResetDue(LocalDateTime.now().plusHours(1));
         given(memberRepository.findById(anyString()))
             .willReturn(Optional.of(member));
         //when
         MemberException exception = assertThrows(MemberException.class, () ->
-            memberService.sendResetEmail("1"));
+            memberService.sendEmailToResetPassword("1"));
         //then
         assertEquals(ErrorCode.ACCESS_NOT_VALID, exception.getError());
     }
@@ -329,18 +331,18 @@ class MemberServiceTest {
     @DisplayName("비밀번호 초기화 페이지 접근 성공")
     void success_resetAuth() {
         //given
-        member.setPasswordAuthKey("1111");
+        member.setPasswordResetKey("1111");
         member.setEmailAuthYn(false);
-        member.setPasswordAuthDue(LocalDateTime.now().plusHours(1));
-        given(memberRepository.findByPasswordAuthKey(anyString()))
+        member.setPasswordResetDue(LocalDateTime.now().plusHours(1));
+        given(memberRepository.findByPasswordResetKey(anyString()))
             .willReturn(Optional.of(member));
         //when
-        String email = memberService.resetAuth("1");
+        String email = memberService.authPasswordResetKey("1");
 
         //then
         assertEquals(member.getEmail(), email);
-        assertEquals("", member.getPasswordAuthKey());
-        assertTrue(LocalDateTime.now().plusMinutes(1).isAfter(member.getPasswordAuthDue()));
+        assertEquals("", member.getPasswordResetKey());
+        assertTrue(LocalDateTime.now().plusMinutes(1).isAfter(member.getPasswordResetDue()));
         assertTrue(member.isEmailAuthYn());
     }
 
@@ -350,7 +352,7 @@ class MemberServiceTest {
         //given
         //when
         MemberException exception = assertThrows(MemberException.class, () ->
-            memberService.resetAuth("1"));
+            memberService.authPasswordResetKey("1"));
         //then
         assertEquals(ErrorCode.DATA_NOT_VALID, exception.getError());
     }
@@ -359,12 +361,12 @@ class MemberServiceTest {
     @DisplayName("비밀번호 초기화 페이지 접근 실패 - 키 기간 만료")
     void fail_resetAuth_KeyExpired() {
         //given
-        member.setPasswordAuthDue(LocalDateTime.now().minusSeconds(1));
-        given(memberRepository.findByPasswordAuthKey(anyString()))
+        member.setPasswordResetDue(LocalDateTime.now().minusSeconds(1));
+        given(memberRepository.findByPasswordResetKey(anyString()))
             .willReturn(Optional.of(member));
         //when
         MemberException exception = assertThrows(MemberException.class, () ->
-            memberService.resetAuth("1"));
+            memberService.authPasswordResetKey("1"));
         //then
         assertEquals(ErrorCode.ACCESS_NOT_VALID, exception.getError());
     }
@@ -377,9 +379,8 @@ class MemberServiceTest {
         given(memberRepository.findById(anyString()))
             .willReturn(Optional.of(member));
         //when
-        boolean result = memberService.resetProcess("1", "1111");
+        memberService.processResetPassword("1", "1111");
         //then
-        assertTrue(result);
         assertNotEquals("1111", member.getPassword());
     }
 
@@ -389,7 +390,7 @@ class MemberServiceTest {
         //given
         //when
         MemberException exception = assertThrows(MemberException.class, () ->
-            memberService.resetProcess("1", "1111"));
+            memberService.processResetPassword("1", "1111"));
         //then
         assertEquals(ErrorCode.USER_NOT_FOUND, exception.getError());
     }

@@ -32,8 +32,8 @@ public class MemberController {
 
     @GetMapping("/member/email-auth")
     public ResponseResult emailAuth(@RequestParam("key") String key) {
-        boolean result = memberService.emailAuth(key);
-        return ResponseResult.ok(result);
+        memberService.emailAuth(key);
+        return ResponseResult.ok(true);
 
     }
 
@@ -53,32 +53,32 @@ public class MemberController {
     @PutMapping("/member/edit-password")
     public ResponseResult editPassword(Principal principal,
         @RequestBody @Valid EditPassword.Request request){
-        boolean result = memberService.editPassword(principal.getName(), request);
-        return ResponseResult.ok(result);
+        memberService.editPassword(principal.getName(), request);
+        return ResponseResult.ok(true);
     }
 
     @DeleteMapping("/member/withdraw")
     public ResponseResult withdraw(Principal principal,
         @RequestBody String password){
-        boolean result = memberService.withdraw(principal.getName(), password);
-        return ResponseResult.ok(result);
+        memberService.withdraw(principal.getName(), password);
+        return ResponseResult.ok(true);
     }
 
     @PostMapping("/member/reset-password")
     public ResponseResult resetPasswordRequest(@RequestBody String email){
-        return ResponseResult.ok(memberService.sendResetEmail(email));
+        return ResponseResult.ok(memberService.sendEmailToResetPassword(email));
     }
 
     @GetMapping("/member/reset-password")
     public ResponseResult resetPasswordProceeding(@RequestParam("key") String key) {
-        return ResponseResult.ok(memberService.resetAuth(key));
+        return ResponseResult.ok(memberService.authPasswordResetKey(key));
     }
 
     @PutMapping("/member/reset-password")
     public ResponseResult resetPasswordProceeding(
         @RequestBody @Valid ResetPassword.Request request) {
-        boolean result = memberService.resetProcess(request.getEmail(), request.getPassword());
-        return ResponseResult.ok(result);
+        memberService.processResetPassword(request.getEmail(), request.getPassword());
+        return ResponseResult.ok(true);
     }
 
 //    @GetMapping("/member/info/likes")

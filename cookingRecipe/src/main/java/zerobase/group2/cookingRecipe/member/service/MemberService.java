@@ -68,7 +68,7 @@ public class MemberService implements UserDetailsService {
         return BCrypt.hashpw(password, salt);
     }
 
-    public boolean emailAuth(String key) {
+    public void emailAuth(String key) {
         Member member = memberRepository.findByEmailAuthKey(key)
             .orElseThrow(() -> new MemberException(ErrorCode.DATA_NOT_VALID));
 
@@ -84,8 +84,6 @@ public class MemberService implements UserDetailsService {
         member.setEmailAuthYn(true);
         member.setEmailAuthDue(LocalDateTime.now());
         memberRepository.save(member);
-
-        return member.isEmailAuthYn();
     }
 
     @Override
@@ -120,7 +118,7 @@ public class MemberService implements UserDetailsService {
         return MemberDto.from(member);
     }
 
-    public boolean editPassword(String email, EditPassword.Request request) {
+    public void editPassword(String email, EditPassword.Request request) {
         Member member = getMemberById(email);
 
         if(member.validatePassword(hashedPassword(request.getOldPassword(), member.getPassword()))){
@@ -129,12 +127,9 @@ public class MemberService implements UserDetailsService {
 
         member.setPassword(hashedPassword(request.getNewPassword(), BCrypt.gensalt()));
         memberRepository.save(member);
-        return !member.validatePassword(hashedPassword(
-            request.getNewPassword(), member.getPassword()
-        ));
     }
 
-    public boolean withdraw(String email, String password) {
+    public void withdraw(String email, String password) {
         Member member = getMemberById(email);
 
         if(member.validatePassword(hashedPassword(password, member.getPassword()))){
@@ -144,26 +139,25 @@ public class MemberService implements UserDetailsService {
         member.setName("탈퇴회원");
         member.setStatus(MemberStatus.WITHDRAW);
         memberRepository.save(member);
-        return true;
     }
 
-    public boolean sendResetEmail(String email) {
+    public boolean sendEmailToResetPassword(String email) {
         Member member = getMemberById(email);
 
         if(member.validateKeyAndDue()){
             throw new MemberException(ErrorCode.ACCESS_NOT_VALID);
         }
 
-        member.setPasswordAuthKey(UUID.randomUUID().toString());
-        member.setPasswordAuthDue(LocalDateTime.now().plusMinutes(10));
+        member.setPasswordResetKey(UUID.randomUUID().toString());
+        member.setPasswordResetDue(LocalDateTime.now().plusMinutes(10));
         memberRepository.save(member);
 
-        sendResetEmail(member.getEmail(), member.getEmailAuthKey());
+        sendEmailToResetPassword(member.getEmail(), member.getEmailAuthKey());
 
         return true;
     }
 
-    private void sendResetEmail(String email, String uuid) {
+    private void sendEmailToResetPassword(String email, String uuid) {
         String subject = "비밀번호 초기화 이메일";
         String text = "<p>아래 링크를 클릭해서 비밀번호를 재설정하세요.</p>" +
             "<div><a target='_blank' href='http://localhost:8080/member/reset-password?key=" +
@@ -171,28 +165,26 @@ public class MemberService implements UserDetailsService {
         mailComponent.sendMail(email, subject, text);
     }
 
-    public String resetAuth(String key) {
-        Member member = memberRepository.findByPasswordAuthKey(key)
+    public String authPasswordResetKey(String key) {
+        Member member = memberRepository.findByPasswordResetKey(key)
             .orElseThrow(() -> new MemberException(ErrorCode.DATA_NOT_VALID));
 
-        if (LocalDateTime.now().isAfter(member.getPasswordAuthDue())){
+        if (LocalDateTime.now().isAfter(member.getPasswordResetDue())){
             throw new MemberException(ErrorCode.ACCESS_NOT_VALID);
         }
 
-        member.setPasswordAuthKey("");
-        member.setPasswordAuthDue(LocalDateTime.now());
+        member.setPasswordResetKey("");
+        member.setPasswordResetDue(LocalDateTime.now());
         member.setEmailAuthYn(true);
         memberRepository.save(member);
 
         return member.getEmail();
     }
 
-    public boolean resetProcess(String email, String password) {
+    public void processResetPassword(String email, String password) {
         Member member = getMemberById(email);
 
         member.setPassword(hashedPassword(password, BCrypt.gensalt()));
         memberRepository.save(member);
-
-        return true;
     }
 }

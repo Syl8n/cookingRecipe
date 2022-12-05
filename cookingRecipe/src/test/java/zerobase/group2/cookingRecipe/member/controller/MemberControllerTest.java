@@ -1,7 +1,6 @@
 package zerobase.group2.cookingRecipe.member.controller;
 
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.BDDMockito.given;
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.get;
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.post;
@@ -59,8 +58,8 @@ class MemberControllerTest {
     void successEmailAuth() throws Exception {
         //given
         String uuid = UUID.randomUUID().toString();
-        given(memberService.emailAuth(anyString()))
-            .willReturn(true);
+//        given(memberService.emailAuth(anyString()))
+//            .wil
 
         //when
         //then
