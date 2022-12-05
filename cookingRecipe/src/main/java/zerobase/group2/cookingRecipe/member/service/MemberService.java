@@ -16,10 +16,7 @@ import org.springframework.security.crypto.bcrypt.BCrypt;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import zerobase.group2.cookingRecipe.member.component.MailComponent;
-import zerobase.group2.cookingRecipe.member.dto.EditMemberInfo;
-import zerobase.group2.cookingRecipe.member.dto.EditPassword;
 import zerobase.group2.cookingRecipe.member.dto.MemberDto;
-import zerobase.group2.cookingRecipe.member.dto.MemberRegister.Request;
 import zerobase.group2.cookingRecipe.member.entity.Member;
 import zerobase.group2.cookingRecipe.member.exception.MemberException;
 import zerobase.group2.cookingRecipe.member.repository.MemberRepository;
@@ -33,8 +30,8 @@ public class MemberService implements UserDetailsService {
     private final MemberRepository memberRepository;
     private final MailComponent mailComponent;
 
-    public MemberDto register(Request request) {
-        memberRepository.findById(request.getEmail())
+    public MemberDto register(String email, String password, String name) {
+        memberRepository.findById(email)
             .ifPresent(e -> {
                 throw new MemberException(ErrorCode.EMAIL_ALREADY_REGISTERED);
             });
@@ -42,16 +39,16 @@ public class MemberService implements UserDetailsService {
         String uuid = UUID.randomUUID().toString();
 
         Member member = memberRepository.save(Member.builder()
-            .email(request.getEmail())
-            .name(request.getName())
-            .password(hashedPassword(request.getPassword(), BCrypt.gensalt()))
+            .email(email)
+            .name(name)
+            .password(hashedPassword(password, BCrypt.gensalt()))
             .emailAuthDue(LocalDateTime.now().plusHours(1))
             .emailAuthKey(uuid)
             .emailAuthYn(false)
             .status(MemberStatus.BEFORE_AUTH)
             .build());
 
-        sendEmail(request.getEmail(), uuid);
+        sendEmail(email, uuid);
 
         return MemberDto.from(member);
     }
@@ -111,21 +108,21 @@ public class MemberService implements UserDetailsService {
             .orElseThrow(() -> new MemberException(ErrorCode.USER_NOT_FOUND));
     }
 
-    public MemberDto editMemberInfo(String email, EditMemberInfo.Request request) {
+    public MemberDto editMemberInfo(String email, String name) {
         Member member = getMemberById(email);
-        member.setName(request.getName());
+        member.setName(name);
         memberRepository.save(member);
         return MemberDto.from(member);
     }
 
-    public void editPassword(String email, EditPassword.Request request) {
+    public void editPassword(String email, String oldPassword, String newPassword) {
         Member member = getMemberById(email);
 
-        if(member.validatePassword(hashedPassword(request.getOldPassword(), member.getPassword()))){
+        if(member.validatePassword(hashedPassword(oldPassword, member.getPassword()))){
             throw new MemberException(ErrorCode.DATA_NOT_VALID);
         }
 
-        member.setPassword(hashedPassword(request.getNewPassword(), BCrypt.gensalt()));
+        member.setPassword(hashedPassword(newPassword, BCrypt.gensalt()));
         memberRepository.save(member);
     }
 

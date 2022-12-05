@@ -26,7 +26,11 @@ public class MemberController {
 
     @PostMapping("/member/register")
     public ResponseResult memberRegister(@RequestBody @Valid MemberRegister.Request request) {
-        MemberDto memberDto = memberService.register(request);
+        MemberDto memberDto = memberService.register(
+            request.getEmail(),
+            request.getPassword(),
+            request.getName()
+        );
         return ResponseResult.ok(MemberRegister.Response.from(memberDto));
     }
 
@@ -46,14 +50,15 @@ public class MemberController {
     @PutMapping("/member/info")
     public ResponseResult editMemberInfo(Principal principal,
         @RequestBody @Valid EditMemberInfo.Request request){
-        MemberDto memberDto = memberService.editMemberInfo(principal.getName(), request);
+        MemberDto memberDto = memberService.editMemberInfo(principal.getName(), request.getName());
         return ResponseResult.ok(memberDto);
     }
 
     @PutMapping("/member/edit-password")
     public ResponseResult editPassword(Principal principal,
         @RequestBody @Valid EditPassword.Request request){
-        memberService.editPassword(principal.getName(), request);
+        memberService.editPassword(principal.getName(),
+            request.getOldPassword(), request.getNewPassword());
         return ResponseResult.ok(true);
     }
 

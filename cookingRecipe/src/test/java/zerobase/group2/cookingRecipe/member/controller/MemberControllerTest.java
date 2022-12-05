@@ -1,6 +1,7 @@
 package zerobase.group2.cookingRecipe.member.controller;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.BDDMockito.given;
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.get;
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.post;
@@ -35,7 +36,7 @@ class MemberControllerTest {
     @Test
     void successRegister() throws Exception {
         //given
-        given(memberService.register(any()))
+        given(memberService.register(anyString(), anyString(), anyString()))
             .willReturn(MemberDto.builder()
                 .email("group2@gmail.com")
                 .name("그룹2")

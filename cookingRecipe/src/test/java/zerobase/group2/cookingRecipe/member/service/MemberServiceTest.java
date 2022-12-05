@@ -21,11 +21,7 @@ import org.mockito.Mock;
 import org.springframework.security.crypto.bcrypt.BCrypt;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import zerobase.group2.cookingRecipe.member.component.MailComponent;
-import zerobase.group2.cookingRecipe.member.dto.EditMemberInfo;
-import zerobase.group2.cookingRecipe.member.dto.EditMemberInfo.Request;
-import zerobase.group2.cookingRecipe.member.dto.EditPassword;
 import zerobase.group2.cookingRecipe.member.dto.MemberDto;
-import zerobase.group2.cookingRecipe.member.dto.MemberRegister;
 import zerobase.group2.cookingRecipe.member.entity.Member;
 import zerobase.group2.cookingRecipe.member.exception.MemberException;
 import zerobase.group2.cookingRecipe.member.repository.MemberRepository;
@@ -44,7 +40,6 @@ class MemberServiceTest {
     private MemberService memberService;
 
     private Member member;
-    private MemberRegister.Request registerRequest;
 
     @BeforeEach
     void setUp() {
@@ -58,7 +53,6 @@ class MemberServiceTest {
             .registeredAt(LocalDateTime.now())
             .updatedAt(LocalDateTime.now())
             .build();
-        registerRequest = new MemberRegister.Request("1", "1", "1");
     }
 
 
@@ -74,7 +68,7 @@ class MemberServiceTest {
             .willReturn(true);
 
         //when
-        MemberDto memberDto = memberService.register(registerRequest);
+        MemberDto memberDto = memberService.register("1", "1", "1");
 
         //then
         assertEquals(memberDto.getEmail(), member.getEmail());
@@ -90,7 +84,7 @@ class MemberServiceTest {
 
         //when
         MemberException exception = assertThrows(MemberException.class, () ->
-            memberService.register(registerRequest));
+            memberService.register("1", "1", "1"));
 
         //then
         assertEquals(ErrorCode.EMAIL_ALREADY_REGISTERED, exception.getError());
@@ -185,13 +179,13 @@ class MemberServiceTest {
     @DisplayName("유저 정보 수정 성공")
     void success_editMemberInfo() {
         //given
-        EditMemberInfo.Request request = new Request("이거절대사람이름아님");
+        String name = "이거절대사람이름아님";
         given(memberRepository.findById(anyString()))
             .willReturn(Optional.of(member));
         //when
-        MemberDto memberDto = memberService.editMemberInfo("1", request);
+        MemberDto memberDto = memberService.editMemberInfo("1", name);
         //then
-        assertEquals(request.getName(), memberDto.getName());
+        assertEquals(name, memberDto.getName());
     }
 
     @Test
@@ -200,7 +194,7 @@ class MemberServiceTest {
         //given
         //when
         MemberException exception = assertThrows(MemberException.class, () ->
-            memberService.editMemberInfo("1", new EditMemberInfo.Request("name")));
+            memberService.editMemberInfo("1", "name"));
         //then
         assertEquals(ErrorCode.USER_NOT_FOUND, exception.getError());
     }
@@ -209,14 +203,15 @@ class MemberServiceTest {
     @DisplayName("비밀번호 수정 성공")
     void success_editPassword() {
         //given
-        EditPassword.Request request = new EditPassword.Request("1111", "2222");
-        member.setPassword(BCrypt.hashpw(request.getOldPassword(), BCrypt.gensalt()));
+        String oldPassword = "1111";
+        String newPassword = "2222";
+        member.setPassword(BCrypt.hashpw(oldPassword, BCrypt.gensalt()));
         given(memberRepository.findById(anyString()))
             .willReturn(Optional.of(member));
         //when
-        memberService.editPassword("1", request);
+        memberService.editPassword("1", oldPassword, newPassword);
         //then
-        assertEquals(BCrypt.hashpw(request.getNewPassword(), member.getPassword()), member.getPassword());
+        assertEquals(BCrypt.hashpw(newPassword, member.getPassword()), member.getPassword());
     }
 
     @Test
@@ -225,8 +220,7 @@ class MemberServiceTest {
         //given
         //when
         MemberException exception = assertThrows(MemberException.class, () ->
-            memberService.editPassword("1",
-                new EditPassword.Request("1", "2")));
+            memberService.editPassword("1", "1", "2"));
         //then
         assertEquals(ErrorCode.USER_NOT_FOUND, exception.getError());
     }
@@ -235,13 +229,12 @@ class MemberServiceTest {
     @DisplayName("비밀번호 수정 실패 - 비밀번호 불일치")
     void fail_editPassword_passwordNotMatched() {
         //given
-        EditPassword.Request request = new EditPassword.Request("1111", "2222");
         member.setPassword(BCrypt.hashpw("3333", BCrypt.gensalt()));
         given(memberRepository.findById(anyString()))
             .willReturn(Optional.of(member));
         //when
         MemberException exception = assertThrows(MemberException.class, () ->
-            memberService.editPassword("1", request));
+            memberService.editPassword("1", "1111", "2222"));
         //then
         assertEquals(ErrorCode.DATA_NOT_VALID, exception.getError());
     }
