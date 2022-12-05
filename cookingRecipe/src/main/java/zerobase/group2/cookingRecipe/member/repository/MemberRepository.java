@@ -9,4 +9,5 @@ import zerobase.group2.cookingRecipe.member.entity.Member;
 public interface MemberRepository extends JpaRepository<Member, String> {
 
     Optional<Member> findByEmailAuthKey(String key);
+    Optional<Member> findByPasswordAuthKey(String key);
 }

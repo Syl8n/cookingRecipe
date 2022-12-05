@@ -1,5 +1,6 @@
 package zerobase.group2.cookingRecipe.member.dto;
 
+import java.time.LocalDateTime;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -13,15 +14,17 @@ import zerobase.group2.cookingRecipe.member.entity.Member;
 @AllArgsConstructor
 @Builder
 public class MemberDto {
-    String email;
-    String name;
-    String key;
+    private String email;
+    private String name;
+    private LocalDateTime registeredAt;
+    private LocalDateTime updatedAt;
 
     public static MemberDto from(Member member){
         return MemberDto.builder()
             .email(member.getEmail())
             .name(member.getName())
-            .key(member.getEmailAuthKey())
+            .registeredAt(member.getRegisteredAt())
+            .updatedAt(member.getUpdatedAt())
             .build();
     }
 }
