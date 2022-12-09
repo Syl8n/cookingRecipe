@@ -16,7 +16,7 @@ import zerobase.group2.cookingRecipe.member.dto.MemberDto;
 import zerobase.group2.cookingRecipe.member.dto.MemberRegister;
 import zerobase.group2.cookingRecipe.member.dto.ResetPassword;
 import zerobase.group2.cookingRecipe.member.service.MemberService;
-import zerobase.group2.cookingRecipe.model.ResponseResult;
+import zerobase.group2.cookingRecipe.common.model.ResponseResult;
 
 @RestController
 @RequiredArgsConstructor

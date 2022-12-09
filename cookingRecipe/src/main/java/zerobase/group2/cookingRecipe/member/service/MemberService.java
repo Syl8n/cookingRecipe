@@ -15,13 +15,13 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCrypt;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import zerobase.group2.cookingRecipe.common.exception.CustomException;
+import zerobase.group2.cookingRecipe.common.type.ErrorCode;
 import zerobase.group2.cookingRecipe.member.component.MailComponent;
 import zerobase.group2.cookingRecipe.member.dto.MemberDto;
 import zerobase.group2.cookingRecipe.member.entity.Member;
-import zerobase.group2.cookingRecipe.member.exception.MemberException;
 import zerobase.group2.cookingRecipe.member.repository.MemberRepository;
 import zerobase.group2.cookingRecipe.member.type.MemberStatus;
-import zerobase.group2.cookingRecipe.type.ErrorCode;
 
 @Service
 @Transactional
@@ -33,7 +33,7 @@ public class MemberService implements UserDetailsService {
     public MemberDto register(String email, String password, String name) {
         memberRepository.findById(email)
             .ifPresent(e -> {
-                throw new MemberException(ErrorCode.EMAIL_ALREADY_REGISTERED);
+                throw new CustomException(ErrorCode.EMAIL_ALREADY_REGISTERED);
             });
 
         String uuid = UUID.randomUUID().toString();
@@ -67,14 +67,14 @@ public class MemberService implements UserDetailsService {
 
     public void emailAuth(String key) {
         Member member = memberRepository.findByEmailAuthKey(key)
-            .orElseThrow(() -> new MemberException(ErrorCode.DATA_NOT_VALID));
+            .orElseThrow(() -> new CustomException(ErrorCode.DATA_NOT_VALID));
 
         if (member.isEmailAuthYn()) {
-            throw new MemberException(ErrorCode.ACCESS_NOT_VALID);
+            throw new CustomException(ErrorCode.ACCESS_NOT_VALID);
         }
 
         if (LocalDateTime.now().isAfter(member.getEmailAuthDue())){
-            throw new MemberException(ErrorCode.ACCESS_NOT_VALID);
+            throw new CustomException(ErrorCode.ACCESS_NOT_VALID);
         }
 
         member.setStatus(MemberStatus.IN_USE);
@@ -105,7 +105,7 @@ public class MemberService implements UserDetailsService {
 
     private Member getMemberById(String email) {
         return memberRepository.findById(email)
-            .orElseThrow(() -> new MemberException(ErrorCode.USER_NOT_FOUND));
+            .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
     }
 
     public MemberDto editMemberInfo(String email, String name) {
@@ -119,7 +119,7 @@ public class MemberService implements UserDetailsService {
         Member member = getMemberById(email);
 
         if(member.validatePassword(hashedPassword(oldPassword, member.getPassword()))){
-            throw new MemberException(ErrorCode.DATA_NOT_VALID);
+            throw new CustomException(ErrorCode.DATA_NOT_VALID);
         }
 
         member.setPassword(hashedPassword(newPassword, BCrypt.gensalt()));
@@ -130,7 +130,7 @@ public class MemberService implements UserDetailsService {
         Member member = getMemberById(email);
 
         if(member.validatePassword(hashedPassword(password, member.getPassword()))){
-            throw new MemberException(ErrorCode.DATA_NOT_VALID);
+            throw new CustomException(ErrorCode.DATA_NOT_VALID);
         }
 
         member.setName("탈퇴회원");
@@ -142,7 +142,7 @@ public class MemberService implements UserDetailsService {
         Member member = getMemberById(email);
 
         if(member.validateKeyAndDue()){
-            throw new MemberException(ErrorCode.ACCESS_NOT_VALID);
+            throw new CustomException(ErrorCode.ACCESS_NOT_VALID);
         }
 
         member.setPasswordResetKey(UUID.randomUUID().toString());
@@ -164,10 +164,10 @@ public class MemberService implements UserDetailsService {
 
     public String authPasswordResetKey(String key) {
         Member member = memberRepository.findByPasswordResetKey(key)
-            .orElseThrow(() -> new MemberException(ErrorCode.DATA_NOT_VALID));
+            .orElseThrow(() -> new CustomException(ErrorCode.DATA_NOT_VALID));
 
         if (LocalDateTime.now().isAfter(member.getPasswordResetDue())){
-            throw new MemberException(ErrorCode.ACCESS_NOT_VALID);
+            throw new CustomException(ErrorCode.ACCESS_NOT_VALID);
         }
 
         member.setPasswordResetKey("");

@@ -1,11 +1,11 @@
-package zerobase.group2.cookingRecipe.model;
+package zerobase.group2.cookingRecipe.common.model;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import zerobase.group2.cookingRecipe.type.StatusCode;
+import zerobase.group2.cookingRecipe.common.type.StatusCode;
 
 @Getter
 @Setter
