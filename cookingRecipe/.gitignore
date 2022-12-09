@@ -18,6 +18,8 @@ bin/
 !**/src/test/**/bin/
 
 ### IntelliJ IDEA ###
+application-api-key.properties
+
 .idea
 *.iws
 *.iml
@@ -38,4 +40,3 @@ out/
 
 ### application.yml ###
 *.yml
-*.properties
