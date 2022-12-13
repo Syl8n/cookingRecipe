@@ -23,10 +23,10 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import zerobase.group2.cookingRecipe.member.component.MailComponent;
 import zerobase.group2.cookingRecipe.member.dto.MemberDto;
 import zerobase.group2.cookingRecipe.member.entity.Member;
-import zerobase.group2.cookingRecipe.member.exception.MemberException;
+import zerobase.group2.cookingRecipe.common.exception.CustomException;
 import zerobase.group2.cookingRecipe.member.repository.MemberRepository;
 import zerobase.group2.cookingRecipe.member.type.MemberStatus;
-import zerobase.group2.cookingRecipe.type.ErrorCode;
+import zerobase.group2.cookingRecipe.common.type.ErrorCode;
 
 @ExtendWith(SpringExtension.class)
 class MemberServiceTest {
@@ -83,7 +83,7 @@ class MemberServiceTest {
             .willReturn(Optional.of(member));
 
         //when
-        MemberException exception = assertThrows(MemberException.class, () ->
+        CustomException exception = assertThrows(CustomException.class, () ->
             memberService.register("1", "1", "1"));
 
         //then
@@ -110,7 +110,7 @@ class MemberServiceTest {
         //given
 
         //when
-        MemberException exception = assertThrows(MemberException.class, () ->
+        CustomException exception = assertThrows(CustomException.class, () ->
             memberService.emailAuth("1"));
         //then
         assertEquals(ErrorCode.DATA_NOT_VALID, exception.getError());
@@ -124,7 +124,7 @@ class MemberServiceTest {
         given(memberRepository.findByEmailAuthKey(anyString()))
             .willReturn(Optional.of(member));
         //when
-        MemberException exception = assertThrows(MemberException.class, () ->
+        CustomException exception = assertThrows(CustomException.class, () ->
             memberService.emailAuth(member.getEmailAuthKey()));
         //then
         assertFalse(member.isEmailAuthYn());
@@ -139,7 +139,7 @@ class MemberServiceTest {
         given(memberRepository.findByEmailAuthKey(anyString()))
             .willReturn(Optional.of(member));
         //when
-        MemberException exception = assertThrows(MemberException.class, () ->
+        CustomException exception = assertThrows(CustomException.class, () ->
             memberService.emailAuth(member.getEmailAuthKey()));
         //then
         assertTrue(LocalDateTime.now().isBefore(member.getEmailAuthDue()));
@@ -169,7 +169,7 @@ class MemberServiceTest {
         given(memberRepository.findById(anyString()))
             .willReturn(Optional.empty());
         //when
-        MemberException exception = assertThrows(MemberException.class, () ->
+        CustomException exception = assertThrows(CustomException.class, () ->
             memberService.getInfoById("1"));
         //then
         assertEquals(ErrorCode.USER_NOT_FOUND, exception.getError());
@@ -193,7 +193,7 @@ class MemberServiceTest {
     void fail_editMemberInfo() {
         //given
         //when
-        MemberException exception = assertThrows(MemberException.class, () ->
+        CustomException exception = assertThrows(CustomException.class, () ->
             memberService.editMemberInfo("1", "name"));
         //then
         assertEquals(ErrorCode.USER_NOT_FOUND, exception.getError());
@@ -219,7 +219,7 @@ class MemberServiceTest {
     void fail_editPassword_userNotFound() {
         //given
         //when
-        MemberException exception = assertThrows(MemberException.class, () ->
+        CustomException exception = assertThrows(CustomException.class, () ->
             memberService.editPassword("1", "1", "2"));
         //then
         assertEquals(ErrorCode.USER_NOT_FOUND, exception.getError());
@@ -233,7 +233,7 @@ class MemberServiceTest {
         given(memberRepository.findById(anyString()))
             .willReturn(Optional.of(member));
         //when
-        MemberException exception = assertThrows(MemberException.class, () ->
+        CustomException exception = assertThrows(CustomException.class, () ->
             memberService.editPassword("1", "1111", "2222"));
         //then
         assertEquals(ErrorCode.DATA_NOT_VALID, exception.getError());
@@ -258,7 +258,7 @@ class MemberServiceTest {
     void fail_withdraw_userNotFound() {
         //given
         //when
-        MemberException exception = assertThrows(MemberException.class, () ->
+        CustomException exception = assertThrows(CustomException.class, () ->
             memberService.withdraw("1", "1111"));
         //then
         assertEquals(ErrorCode.USER_NOT_FOUND, exception.getError());
@@ -272,7 +272,7 @@ class MemberServiceTest {
         given(memberRepository.findById(anyString()))
             .willReturn(Optional.of(member));
         //when
-        MemberException exception = assertThrows(MemberException.class, () ->
+        CustomException exception = assertThrows(CustomException.class, () ->
             memberService.withdraw("1", "1111"));
         //then
         assertEquals(ErrorCode.DATA_NOT_VALID, exception.getError());
@@ -299,7 +299,7 @@ class MemberServiceTest {
     void fail_sendResetEmail_userNotFound() {
         //given
         //when
-        MemberException exception = assertThrows(MemberException.class, () ->
+        CustomException exception = assertThrows(CustomException.class, () ->
             memberService.sendEmailToResetPassword("1"));
         //then
         assertEquals(ErrorCode.USER_NOT_FOUND, exception.getError());
@@ -314,7 +314,7 @@ class MemberServiceTest {
         given(memberRepository.findById(anyString()))
             .willReturn(Optional.of(member));
         //when
-        MemberException exception = assertThrows(MemberException.class, () ->
+        CustomException exception = assertThrows(CustomException.class, () ->
             memberService.sendEmailToResetPassword("1"));
         //then
         assertEquals(ErrorCode.ACCESS_NOT_VALID, exception.getError());
@@ -344,7 +344,7 @@ class MemberServiceTest {
     void fail_resetAuth_NotValidUrl() {
         //given
         //when
-        MemberException exception = assertThrows(MemberException.class, () ->
+        CustomException exception = assertThrows(CustomException.class, () ->
             memberService.authPasswordResetKey("1"));
         //then
         assertEquals(ErrorCode.DATA_NOT_VALID, exception.getError());
@@ -358,7 +358,7 @@ class MemberServiceTest {
         given(memberRepository.findByPasswordResetKey(anyString()))
             .willReturn(Optional.of(member));
         //when
-        MemberException exception = assertThrows(MemberException.class, () ->
+        CustomException exception = assertThrows(CustomException.class, () ->
             memberService.authPasswordResetKey("1"));
         //then
         assertEquals(ErrorCode.ACCESS_NOT_VALID, exception.getError());
@@ -382,7 +382,7 @@ class MemberServiceTest {
     void fail_resetProcess_userNotFound() {
         //given
         //when
-        MemberException exception = assertThrows(MemberException.class, () ->
+        CustomException exception = assertThrows(CustomException.class, () ->
             memberService.processResetPassword("1", "1111"));
         //then
         assertEquals(ErrorCode.USER_NOT_FOUND, exception.getError());

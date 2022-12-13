@@ -1,4 +1,4 @@
-package zerobase.group2.cookingRecipe.type;
+package zerobase.group2.cookingRecipe.common.type;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;

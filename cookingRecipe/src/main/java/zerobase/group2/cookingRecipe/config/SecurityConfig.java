@@ -48,11 +48,11 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         http.headers().frameOptions().sameOrigin();
 
         http.authorizeRequests()
-            .antMatchers(
-                "/"
-                , "/member/register"
-                , "/member/email-auth"
-                , "/member/find-password"
+            .antMatchers("/",
+                "/member/register",
+                "/member/email-auth",
+                "/member/find-password",
+                "/api"
             )
             .permitAll();
 
