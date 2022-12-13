@@ -7,6 +7,7 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.verify;
 
+import java.util.Arrays;
 import java.util.Optional;
 import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
@@ -63,8 +64,8 @@ class RecipeServiceTest {
             "반찬",
             "삼겹살",
             300.0,
-            new String[]{"판을 달군다", "고기를 꺼낸다", "굽는다"},
-            new String[]{"manualImage1", "manualImage2", "manualImage3"}
+            Arrays.asList("판을 달군다", "고기를 꺼낸다", "굽는다"),
+            Arrays.asList("manualImage1", "manualImage2", "manualImage3")
         );
         recipe = Recipe.builder()
             .id(UUID.randomUUID().toString().replace("-", ""))
@@ -75,8 +76,8 @@ class RecipeServiceTest {
             .type2(request.getType2())
             .ingredients(request.getIngredients())
             .kcal(request.getKcal())
-            .manual(String.join("\n", request.getManual()))
-            .manualImagePath(String.join("\n", request.getManualImagePath()))
+            .manual(request.getManual())
+            .manualImagePath(request.getManualImagePath())
             .status(RecipeStatus.REGISTERED)
             .email(member1.getEmail())
             .build();
@@ -116,8 +117,8 @@ class RecipeServiceTest {
         assertEquals(request.getType1(), captorValue.getType1());
         assertEquals(request.getType2(), captorValue.getType2());
         assertEquals(request.getKcal(), captorValue.getKcal());
-        assertEquals(String.join("\n", request.getManual()), captorValue.getManual());
-        assertEquals(String.join("\n", request.getManualImagePath()), captorValue.getManualImagePath());
+        assertEquals(request.getManual(), captorValue.getManual());
+        assertEquals(request.getManualImagePath(), captorValue.getManualImagePath());
         assertEquals(member1.getEmail(), captorValue.getEmail());
         assertEquals(RecipeStatus.REGISTERED, captorValue.getStatus());
     }
@@ -215,7 +216,7 @@ class RecipeServiceTest {
             .willReturn(Optional.of(recipe));
 
         //when
-        String recipeId = recipeService.requestEditRecipe("id", "email");
+        String recipeId = recipeService.checkAuthorityToEditRecipe("id", "email");
 
         //then
         assertEquals(recipe.getId(), recipeId);
@@ -230,7 +231,7 @@ class RecipeServiceTest {
 
         //when
         CustomException exception = assertThrows(CustomException.class, () ->
-            recipeService.requestEditRecipe("id", "email"));
+            recipeService.checkAuthorityToEditRecipe("id", "email"));
 
         //then
         assertEquals(ErrorCode.USER_NOT_FOUND, exception.getError());
@@ -247,7 +248,7 @@ class RecipeServiceTest {
 
         //when
         CustomException exception = assertThrows(CustomException.class, () ->
-            recipeService.requestEditRecipe("id", "email"));
+            recipeService.checkAuthorityToEditRecipe("id", "email"));
 
         //then
         assertEquals(ErrorCode.RECIPE_NOT_FOUND, exception.getError());
@@ -265,7 +266,7 @@ class RecipeServiceTest {
 
         //when
         CustomException exception = assertThrows(CustomException.class, () ->
-            recipeService.requestEditRecipe("id", "email"));
+            recipeService.checkAuthorityToEditRecipe("id", "email"));
 
         //then
         assertEquals(ErrorCode.RECIPE_NOT_FOUND, exception.getError());
@@ -282,7 +283,7 @@ class RecipeServiceTest {
 
         //when
         CustomException exception = assertThrows(CustomException.class, () ->
-            recipeService.requestEditRecipe("id", "email"));
+            recipeService.checkAuthorityToEditRecipe("id", "email"));
 
         //then
         assertEquals(ErrorCode.USER_NOT_EDITOR, exception.getError());
@@ -309,8 +310,8 @@ class RecipeServiceTest {
             "edited 반찬",
             "edited 삼겹살",
             500.0,
-            new String[]{"edited 판을 달군다", "고기를 꺼낸다", "굽는다"},
-            new String[]{"edited manualImage1", "manualImage2", "manualImage3"}
+            Arrays.asList("edited 판을 달군다", "고기를 꺼낸다", "굽는다"),
+            Arrays.asList("edited manualImage1", "manualImage2", "manualImage3")
         );
 
         //when
@@ -337,8 +338,8 @@ class RecipeServiceTest {
         assertEquals(req.getType1(), captorValue.getType1());
         assertEquals(req.getType2(), captorValue.getType2());
         assertEquals(req.getKcal(), captorValue.getKcal());
-        assertEquals(String.join("\n", req.getManual()), captorValue.getManual());
-        assertEquals(String.join("\n", req.getManualImagePath()), captorValue.getManualImagePath());
+        assertEquals(req.getManual(), captorValue.getManual());
+        assertEquals(req.getManualImagePath(), captorValue.getManualImagePath());
         assertEquals(member1.getEmail(), captorValue.getEmail());
     }
 

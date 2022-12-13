@@ -1,5 +1,6 @@
 package zerobase.group2.cookingRecipe.recipe.dto;
 
+import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -23,8 +24,8 @@ public class RecipeDto {
     private String ingredients;
     private double kcal;
 
-    private String manual;
-    private String manualImagePath;
+    private List<String> manual;
+    private List<String> manualImagePath;
 
     private String email;
     public static RecipeDto from(Recipe recipe){

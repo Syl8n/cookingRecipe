@@ -1,8 +1,10 @@
 package zerobase.group2.cookingRecipe.recipe.Entity;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.UUID;
 import javax.persistence.Column;
+import javax.persistence.Convert;
 import javax.persistence.Entity;
 import javax.persistence.EntityListeners;
 import javax.persistence.Id;
@@ -15,6 +17,7 @@ import org.json.simple.JSONObject;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
+import zerobase.group2.cookingRecipe.recipe.converter.RecipeConverter;
 import zerobase.group2.cookingRecipe.recipe.type.RecipeStatus;
 
 @Getter
@@ -39,9 +42,12 @@ public class Recipe {
     private double kcal; // INFO_ENG
 
     @Column(length=1000)
-    private String manual;
+    @Convert(converter = RecipeConverter.class)
+    private List<String> manual;
+
     @Column(length=1000)
-    private String manualImagePath;
+    @Convert(converter = RecipeConverter.class)
+    private List<String> manualImagePath;
 
     private RecipeStatus status;
 
@@ -54,8 +60,8 @@ public class Recipe {
 
     private LocalDateTime deletedAt;
 
-    public static Recipe from(JSONObject jsonObject, String manual, String manualImagePath,
-        String user){
+    public static Recipe from(JSONObject jsonObject, List<String> manual, List<String> manualImagePath,
+                                String user){
         return Recipe.builder()
             .id(UUID.randomUUID().toString().replace("-", ""))
             .seq(Long.parseLong((String) jsonObject.get("RCP_SEQ")))

@@ -1,5 +1,6 @@
 package zerobase.group2.cookingRecipe.recipe.dto;
 
+import java.util.List;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
@@ -28,8 +29,8 @@ public class RecipeInput {
         private double kcal;
 
         @NotNull
-        private String[] manual;
+        private List<String> manual;
         @NotNull
-        private String[] manualImagePath;
+        private List<String> manualImagePath;
     }
 }

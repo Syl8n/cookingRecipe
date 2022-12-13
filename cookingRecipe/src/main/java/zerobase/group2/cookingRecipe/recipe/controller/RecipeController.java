@@ -47,9 +47,9 @@ public class RecipeController {
     }
 
     @GetMapping("/edit/{recipeId}")
-    public ResponseResult requestEditRecipe(@PathVariable String recipeId,
+    public ResponseResult checkAuthorityToEditRecipe(@PathVariable String recipeId,
         Principal principal){
-        return ResponseResult.ok(recipeService.requestEditRecipe(recipeId, principal.getName()));
+        return ResponseResult.ok(recipeService.checkAuthorityToEditRecipe(recipeId, principal.getName()));
     }
 
     @PutMapping("/edit/{recipeId}")

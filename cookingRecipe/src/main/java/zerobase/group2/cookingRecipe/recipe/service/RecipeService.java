@@ -1,6 +1,7 @@
 package zerobase.group2.cookingRecipe.recipe.service;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -23,7 +24,7 @@ public class RecipeService {
 
     public RecipeDto createRecipe(String title, String mainImagePathSmall,
         String mainImagePathBig, String type1, String type2, String ingredients,
-        double kcal, String[] manual, String[] manualImagePath, String email) {
+        double kcal, List<String> manual, List<String> manualImagePath, String email) {
 
         validateUser(email);
 
@@ -37,8 +38,8 @@ public class RecipeService {
                 .type2(type2)
                 .ingredients(ingredients)
                 .kcal(kcal)
-                .manual(String.join("\n", manual))
-                .manualImagePath(String.join("\n", manualImagePath))
+                .manual(manual)
+                .manualImagePath(manualImagePath)
                 .status(RecipeStatus.REGISTERED)
                 .email(email)
                 .build())
@@ -52,7 +53,7 @@ public class RecipeService {
         return RecipeDto.from(recipe);
     }
 
-    public String requestEditRecipe(String recipeId, String email) {
+    public String checkAuthorityToEditRecipe(String recipeId, String email) {
         Member member = getUserById(email);
         Recipe recipe = getRecipeById(recipeId);
 
@@ -64,7 +65,7 @@ public class RecipeService {
 
     public RecipeDto processEditRecipe(String recipeId, String title, String mainImagePathSmall,
         String mainImagePathBig, String type1, String type2, String ingredients,
-        double kcal, String[] manual, String[] manualImagePath, String email) {
+        double kcal, List<String> manual, List<String> manualImagePath, String email) {
 
         Member member = getUserById(email);
         Recipe recipe = getRecipeById(recipeId);
@@ -79,8 +80,8 @@ public class RecipeService {
         recipe.setType2(type2);
         recipe.setIngredients(ingredients);
         recipe.setKcal(kcal);
-        recipe.setManual(String.join("\n", manual));
-        recipe.setManualImagePath(String.join("\n", manualImagePath));
+        recipe.setManual(manual);
+        recipe.setManualImagePath(manualImagePath);
 
         return RecipeDto.from(recipeRepository.save(recipe));
     }
@@ -101,8 +102,8 @@ public class RecipeService {
         recipe.setType2("");
         recipe.setIngredients("");
         recipe.setKcal(0);
-        recipe.setManual("");
-        recipe.setManualImagePath("");
+        recipe.setManual(null);
+        recipe.setManualImagePath(null);
 
         return RecipeDto.from(recipeRepository.save(recipe));
     }
