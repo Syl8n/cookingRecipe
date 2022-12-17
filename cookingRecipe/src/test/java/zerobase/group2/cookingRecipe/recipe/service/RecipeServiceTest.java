@@ -10,6 +10,9 @@ import static org.mockito.Mockito.verify;
 import java.util.Arrays;
 import java.util.Optional;
 import java.util.UUID;
+import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -32,6 +35,11 @@ import zerobase.group2.cookingRecipe.recipe.type.RecipeStatus;
 @ExtendWith(SpringExtension.class)
 class RecipeServiceTest {
 
+    public static final long VIEWS = 10L;
+    @Mock
+    private HttpServletRequest httpRequest;
+    @Mock
+    private HttpServletResponse httpResponse;
     @Mock
     private MemberRepository memberRepository;
 
@@ -80,6 +88,7 @@ class RecipeServiceTest {
             .manualImagePath(request.getManualImagePath())
             .status(RecipeStatus.REGISTERED)
             .email(member1.getEmail())
+            .views(VIEWS)
             .build();
     }
 
@@ -151,13 +160,13 @@ class RecipeServiceTest {
     }
 
     @Test
-    @DisplayName("레시피 조회 성공")
+    @DisplayName("레시피 조회 성공 - 조회수 증가")
     void success_readRecipe() {
         //given
         given(recipeRepository.findById(anyString()))
             .willReturn(Optional.of(recipe));
         //when
-        RecipeDto recipeDto = recipeService.readRecipe("id");
+        RecipeDto recipeDto = recipeService.readRecipe("id", httpRequest.getCookies(), httpResponse);
 
         //then
         assertEquals(recipe.getId(), recipeDto.getId());
@@ -171,6 +180,32 @@ class RecipeServiceTest {
         assertEquals(recipe.getManual(), recipeDto.getManual());
         assertEquals(recipe.getManualImagePath(), recipeDto.getManualImagePath());
         assertEquals(recipe.getEmail(), recipeDto.getEmail());
+        assertEquals(VIEWS + 1, recipeDto.getViews());
+    }
+
+    @Test
+    @DisplayName("레시피 조회 성공 - 조회수 중복 방지")
+    void success_readRecipe_viewsNotIncrease() {
+        //given
+        given(recipeRepository.findById(anyString()))
+            .willReturn(Optional.of(recipe));
+        //when
+        Cookie[] cookies = new Cookie[]{new Cookie("recipeView", "[" + recipe.getId() + "]")};
+        RecipeDto recipeDto = recipeService.readRecipe("id", cookies, httpResponse);
+
+        //then
+        assertEquals(recipe.getId(), recipeDto.getId());
+        assertEquals(recipe.getTitle(), recipeDto.getTitle());
+        assertEquals(recipe.getMainImagePathBig(), recipeDto.getMainImagePathBig());
+        assertEquals(recipe.getMainImagePathSmall(), recipeDto.getMainImagePathSmall());
+        assertEquals(recipe.getType1(), recipeDto.getType1());
+        assertEquals(recipe.getType2(), recipeDto.getType2());
+        assertEquals(recipe.getIngredients(), recipeDto.getIngredients());
+        assertEquals(recipe.getKcal(), recipeDto.getKcal());
+        assertEquals(recipe.getManual(), recipeDto.getManual());
+        assertEquals(recipe.getManualImagePath(), recipeDto.getManualImagePath());
+        assertEquals(recipe.getEmail(), recipeDto.getEmail());
+        assertEquals(VIEWS, recipeDto.getViews());
     }
 
     @Test
@@ -182,7 +217,7 @@ class RecipeServiceTest {
 
         //when
         CustomException exception = assertThrows(CustomException.class, () ->
-            recipeService.readRecipe("id")
+            recipeService.readRecipe("id", httpRequest.getCookies(), httpResponse)
         );
 
         //then
@@ -199,7 +234,7 @@ class RecipeServiceTest {
 
         //when
         CustomException exception = assertThrows(CustomException.class, () ->
-            recipeService.readRecipe("id")
+            recipeService.readRecipe("id", httpRequest.getCookies(), httpResponse)
         );
 
         //then

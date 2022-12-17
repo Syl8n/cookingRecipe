@@ -3,6 +3,8 @@ package zerobase.group2.cookingRecipe.recipe.service;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
+import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import zerobase.group2.cookingRecipe.common.exception.CustomException;
@@ -19,6 +21,8 @@ import zerobase.group2.cookingRecipe.recipe.type.RecipeStatus;
 public class RecipeService {
 
     public static final String DELETED_RECIPE_TITLE = "삭제된 레시피";
+    public static final int VIEW_UPDATE_INTERVAL = 60 * 60 * 24;
+    public static final String COOKIE_NAME = "recipeView";
     private final RecipeRepository recipeRepository;
     private final MemberRepository memberRepository;
 
@@ -46,11 +50,44 @@ public class RecipeService {
         );
     }
 
-    public RecipeDto readRecipe(String recipeId) {
+    public RecipeDto readRecipe(String recipeId, Cookie[] cookies, HttpServletResponse response) {
         Recipe recipe = getRecipeById(recipeId);
         validateRecipe(recipe);
 
+        Cookie cookie = findCookie(cookies);
+        updateViews(recipe, cookie, response);
+
         return RecipeDto.from(recipe);
+    }
+
+    private Cookie findCookie(Cookie[] cookies){
+        if (cookies != null) {
+            for (Cookie c : cookies) {
+                if (c.getName().equals(COOKIE_NAME)) {
+                    return c;
+                }
+            }
+        }
+        return null;
+    }
+
+    private void updateViews(Recipe recipe, Cookie cookie, HttpServletResponse response) {
+        if(cookie != null && cookie.getValue().contains("["+ recipe.getId() +"]")){
+            return;
+        }
+
+        if(cookie == null){
+            cookie = new Cookie(COOKIE_NAME, "[" + recipe.getId() + "]");
+        } else if (!cookie.getValue().contains("["+ recipe.getId() +"]")){
+            cookie.setValue(cookie.getValue() + "_[" + recipe.getId() + "]");
+        }
+
+        recipe.setViews(recipe.getViews() + 1);
+        recipeRepository.save(recipe);
+
+        cookie.setPath("/");
+        cookie.setMaxAge(VIEW_UPDATE_INTERVAL);
+        response.addCookie(cookie);
     }
 
     public String checkAuthorityToEditRecipe(String recipeId, String email) {

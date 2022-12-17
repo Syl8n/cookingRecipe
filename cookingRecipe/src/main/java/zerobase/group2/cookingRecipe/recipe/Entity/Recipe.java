@@ -56,6 +56,7 @@ public class Recipe {
     private List<String> manualImagePath;
 
     private RecipeStatus status;
+    private Long views;
 
     private String email;
 
