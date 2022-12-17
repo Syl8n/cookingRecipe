@@ -48,7 +48,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         http.headers().frameOptions().sameOrigin();
 
         http.authorizeRequests()
-            .antMatchers("/",
+            .antMatchers("/**",
                 "/member/register",
                 "/member/email-auth",
                 "/member/find-password",

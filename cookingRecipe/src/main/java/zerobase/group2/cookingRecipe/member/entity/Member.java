@@ -1,12 +1,16 @@
 package zerobase.group2.cookingRecipe.member.entity;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Objects;
+import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.EntityListeners;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
+import javax.persistence.FetchType;
 import javax.persistence.Id;
+import javax.persistence.OneToMany;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -15,7 +19,10 @@ import lombok.Setter;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
+import zerobase.group2.cookingRecipe.comment.entity.Comment;
+import zerobase.group2.cookingRecipe.like.entity.LikeEntity;
 import zerobase.group2.cookingRecipe.member.type.MemberStatus;
+import zerobase.group2.cookingRecipe.rating.Entity.Rating;
 
 @Getter
 @Setter
@@ -25,29 +32,48 @@ import zerobase.group2.cookingRecipe.member.type.MemberStatus;
 @Entity
 @EntityListeners(AuditingEntityListener.class)
 public class Member {
+
     @Id
-    String email;
-    String password;
-    String name;
+    private String email;
+    private String password;
+    private String name;
 
     @Enumerated(EnumType.STRING)
-    MemberStatus status;
+    private MemberStatus status;
 
-    String emailAuthKey;
-    LocalDateTime emailAuthDue;
-    boolean emailAuthYn;
+    private String emailAuthKey;
+    private LocalDateTime emailAuthDue;
+    private boolean emailAuthYn;
 
-    String passwordResetKey;
-    LocalDateTime passwordResetDue;
+    private String passwordResetKey;
+    private LocalDateTime passwordResetDue;
 
-    boolean admin;
+    private boolean admin;
 
     @CreatedDate
-    LocalDateTime registeredAt;
+    private LocalDateTime registeredAt;
     @LastModifiedDate
-    LocalDateTime updatedAt;
+    private LocalDateTime updatedAt;
 
-    public boolean validatePassword(String pw){
+    @OneToMany(mappedBy = "member",
+        cascade = CascadeType.ALL,
+        orphanRemoval = true,
+        fetch = FetchType.LAZY)
+    private List<LikeEntity> likeEntityList;
+
+    @OneToMany(mappedBy = "member",
+        cascade = CascadeType.ALL,
+        orphanRemoval = true,
+        fetch = FetchType.LAZY)
+    private List<Comment> commentList;
+
+    @OneToMany(mappedBy = "member",
+        cascade = CascadeType.ALL,
+        orphanRemoval = true,
+        fetch = FetchType.LAZY)
+    private List<Rating> ratingList;
+
+    public boolean validatePassword(String pw) {
         return !password.equals(pw);
     }
 

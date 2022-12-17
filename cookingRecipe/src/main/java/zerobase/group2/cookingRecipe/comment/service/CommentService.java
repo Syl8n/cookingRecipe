@@ -1,0 +1,70 @@
+package zerobase.group2.cookingRecipe.comment.service;
+
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Service;
+import zerobase.group2.cookingRecipe.comment.dto.CommentDto;
+import zerobase.group2.cookingRecipe.comment.entity.Comment;
+import zerobase.group2.cookingRecipe.comment.repository.CommentRepository;
+import zerobase.group2.cookingRecipe.common.exception.CustomException;
+import zerobase.group2.cookingRecipe.common.type.ErrorCode;
+import zerobase.group2.cookingRecipe.member.entity.Member;
+import zerobase.group2.cookingRecipe.member.repository.MemberRepository;
+import zerobase.group2.cookingRecipe.recipe.Entity.Recipe;
+import zerobase.group2.cookingRecipe.recipe.repository.RecipeRepository;
+
+@Slf4j
+@Service
+@RequiredArgsConstructor
+public class CommentService {
+
+    private final CommentRepository commentRepository;
+    private final MemberRepository memberRepository;
+    private final RecipeRepository recipeRepository;
+
+    public CommentDto writeComment(String email, String recipeId, String text) {
+        Member member = getMemberById(email);
+        Recipe recipe = getRecipeById(recipeId);
+
+        return CommentDto.from(commentRepository.save(
+            Comment.builder()
+                .member(member)
+                .recipe(recipe)
+                .text(text)
+                .build()
+        ));
+    }
+
+    public CommentDto updateComment(String email, long commentId, String text) {
+        getMemberById(email);
+        Comment comment = getCommentById(commentId);
+
+        comment.setText(text);
+
+        return CommentDto.from(commentRepository.save(comment));
+    }
+
+    public CommentDto deleteComment(String email, long commentId) {
+        getMemberById(email);
+        Comment comment = getCommentById(commentId);
+
+        commentRepository.delete(comment);
+
+        return CommentDto.from(comment);
+    }
+
+    private Comment getCommentById(long commentId) {
+        return commentRepository.findById(commentId)
+            .orElseThrow(() -> new CustomException(ErrorCode.COMMENT_NOT_FOUND));
+    }
+
+    private Member getMemberById(String email) {
+        return memberRepository.findById(email)
+            .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
+    }
+
+    private Recipe getRecipeById(String recipeId) {
+        return recipeRepository.findById(recipeId)
+            .orElseThrow(() -> new CustomException(ErrorCode.RECIPE_NOT_FOUND));
+    }
+}
