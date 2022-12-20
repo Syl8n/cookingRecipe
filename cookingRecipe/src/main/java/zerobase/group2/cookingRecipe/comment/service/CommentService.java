@@ -36,8 +36,10 @@ public class CommentService {
     }
 
     public CommentDto updateComment(String email, long commentId, String text) {
-        getMemberById(email);
+        Member member = getMemberById(email);
         Comment comment = getCommentById(commentId);
+
+        validateCommentEditor(member, comment.getMember());
 
         comment.setText(text);
 
@@ -51,6 +53,12 @@ public class CommentService {
         commentRepository.delete(comment);
 
         return CommentDto.from(comment);
+    }
+
+    private void validateCommentEditor(Member member, Member commentWriter) {
+        if(!member.getEmail().equals(commentWriter.getEmail())){
+            throw new CustomException(ErrorCode.USER_NOT_EDITOR);
+        }
     }
 
     private Comment getCommentById(long commentId) {

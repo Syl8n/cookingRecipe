@@ -15,7 +15,7 @@ import zerobase.group2.cookingRecipe.common.model.ResponseResult;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/comment")
+@RequestMapping("/comments")
 public class CommentController {
 
     private final CommentService commentService;
