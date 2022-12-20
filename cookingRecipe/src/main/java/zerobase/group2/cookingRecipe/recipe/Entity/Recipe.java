@@ -3,11 +3,14 @@ package zerobase.group2.cookingRecipe.recipe.Entity;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Convert;
 import javax.persistence.Entity;
 import javax.persistence.EntityListeners;
+import javax.persistence.FetchType;
 import javax.persistence.Id;
+import javax.persistence.OneToMany;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -17,6 +20,9 @@ import org.json.simple.JSONObject;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
+import zerobase.group2.cookingRecipe.comment.entity.Comment;
+import zerobase.group2.cookingRecipe.like.entity.LikeEntity;
+import zerobase.group2.cookingRecipe.rating.Entity.Rating;
 import zerobase.group2.cookingRecipe.recipe.converter.RecipeConverter;
 import zerobase.group2.cookingRecipe.recipe.type.RecipeStatus;
 
@@ -50,6 +56,7 @@ public class Recipe {
     private List<String> manualImagePath;
 
     private RecipeStatus status;
+    private Long views;
 
     private String email;
 
@@ -59,6 +66,27 @@ public class Recipe {
     private LocalDateTime updatedAt;
 
     private LocalDateTime deletedAt;
+
+    @OneToMany(mappedBy = "recipe",
+        cascade = CascadeType.ALL,
+        orphanRemoval = true,
+        fetch = FetchType.LAZY)
+    private List<LikeEntity> likeEntityList;
+    private long likeCount;
+
+    @OneToMany(mappedBy = "recipe",
+        cascade = CascadeType.ALL,
+        orphanRemoval = true,
+        fetch = FetchType.LAZY)
+    private List<Comment> commentList;
+
+    @OneToMany(mappedBy = "member",
+        cascade = CascadeType.ALL,
+        orphanRemoval = true,
+        fetch = FetchType.LAZY)
+    private List<Rating> ratingList;
+    private long totalScore;
+    private long ratingCount;
 
     public static Recipe from(JSONObject jsonObject, List<String> manual, List<String> manualImagePath,
                                 String user){

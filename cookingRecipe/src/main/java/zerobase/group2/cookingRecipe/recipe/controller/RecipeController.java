@@ -1,6 +1,8 @@
 package zerobase.group2.cookingRecipe.recipe.controller;
 
 import java.security.Principal;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -42,8 +44,9 @@ public class RecipeController {
     }
 
     @GetMapping("/{recipeId}")
-    public ResponseResult readRecipe(@PathVariable String recipeId){
-        return ResponseResult.ok(recipeService.readRecipe(recipeId));
+    public ResponseResult readRecipe(@PathVariable String recipeId,
+        HttpServletRequest request, HttpServletResponse response){
+        return ResponseResult.ok(recipeService.readRecipe(recipeId, request.getCookies(), response));
     }
 
     @GetMapping("/edit/{recipeId}")

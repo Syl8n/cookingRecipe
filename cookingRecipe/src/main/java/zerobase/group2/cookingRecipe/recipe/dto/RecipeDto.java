@@ -6,6 +6,9 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import zerobase.group2.cookingRecipe.comment.entity.Comment;
+import zerobase.group2.cookingRecipe.like.entity.LikeEntity;
+import zerobase.group2.cookingRecipe.rating.Entity.Rating;
 import zerobase.group2.cookingRecipe.recipe.Entity.Recipe;
 
 @Getter
@@ -27,7 +30,19 @@ public class RecipeDto {
     private List<String> manual;
     private List<String> manualImagePath;
 
+    private Long views;
+
     private String email;
+
+    private List<LikeEntity> likeEntityList;
+    private long likeCount;
+
+    private List<Comment> commentList;
+
+    private List<Rating> ratingList;
+    private long totalScore;
+    private long ratingCount;
+
     public static RecipeDto from(Recipe recipe){
         return RecipeDto.builder()
             .id(recipe.getId())
@@ -40,7 +55,13 @@ public class RecipeDto {
             .kcal(recipe.getKcal())
             .manual(recipe.getManual())
             .manualImagePath(recipe.getManualImagePath())
+            .views(recipe.getViews())
             .email(recipe.getEmail())
+            .likeEntityList(recipe.getLikeEntityList())
+            .likeCount(recipe.getLikeCount())
+            .ratingList(recipe.getRatingList())
+            .totalScore(recipe.getTotalScore())
+            .ratingCount(recipe.getRatingCount())
             .build();
     }
 }
