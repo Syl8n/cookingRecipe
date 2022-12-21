@@ -22,22 +22,28 @@ public class MemberController {
 
     private final MemberService memberService;
 
+    // 로그아웃은 로그인이 되어 있는 상태라 JwtFilter를 통과해야 하기 때문에 필터의 영향을 받는 MemberController에 위치.
+    @GetMapping("/logout")
+    public ResponseResult logout(Principal principal) {
+        return ResponseResult.ok("삭제완료: " + memberService.deleteRefreshToken(principal.getName()));
+    }
+
     @GetMapping("/info")
-    public ResponseResult memberInfo(Principal principal){
+    public ResponseResult memberInfo(Principal principal) {
         MemberDto memberDto = memberService.getInfoById(principal.getName());
         return ResponseResult.ok(memberDto);
     }
 
     @PutMapping("/info")
     public ResponseResult editMemberInfo(Principal principal,
-        @RequestBody @Valid EditMemberInfo.Request request){
+        @RequestBody @Valid EditMemberInfo.Request request) {
         MemberDto memberDto = memberService.editMemberInfo(principal.getName(), request.getName());
         return ResponseResult.ok(memberDto);
     }
 
     @PutMapping("/edit-password")
     public ResponseResult editPassword(Principal principal,
-        @RequestBody @Valid EditPassword.Request request){
+        @RequestBody @Valid EditPassword.Request request) {
         memberService.editPassword(principal.getName(),
             request.getOldPassword(), request.getNewPassword());
         return ResponseResult.ok(true);
@@ -45,7 +51,7 @@ public class MemberController {
 
     @DeleteMapping("/withdraw")
     public ResponseResult withdraw(Principal principal,
-        @RequestBody String password){
+        @RequestBody String password) {
         memberService.withdraw(principal.getName(), password);
         return ResponseResult.ok(true);
     }

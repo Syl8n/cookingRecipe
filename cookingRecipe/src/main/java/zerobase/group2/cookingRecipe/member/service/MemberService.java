@@ -6,18 +6,26 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.CachePut;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCrypt;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
+import zerobase.group2.cookingRecipe.cache.CacheKey;
 import zerobase.group2.cookingRecipe.common.exception.CustomException;
 import zerobase.group2.cookingRecipe.common.type.ErrorCode;
 import zerobase.group2.cookingRecipe.member.component.MailComponent;
 import zerobase.group2.cookingRecipe.member.dto.MemberDto;
 import zerobase.group2.cookingRecipe.member.entity.Member;
+import zerobase.group2.cookingRecipe.member.entity.RefreshToken;
 import zerobase.group2.cookingRecipe.member.repository.MemberRepository;
+import zerobase.group2.cookingRecipe.member.repository.RefreshTokenRepository;
 import zerobase.group2.cookingRecipe.member.type.MemberRole;
 import zerobase.group2.cookingRecipe.member.type.MemberStatus;
 
@@ -25,8 +33,12 @@ import zerobase.group2.cookingRecipe.member.type.MemberStatus;
 @Transactional
 @RequiredArgsConstructor
 public class MemberService implements UserDetailsService {
+
     private final MemberRepository memberRepository;
+    private final RefreshTokenRepository refreshTokenRepository;
     private final MailComponent mailComponent;
+
+    private final RedisTemplate<String, String> redisTemplate;
 
     public MemberDto register(String email, String password, String name) {
         memberRepository.findById(email)
@@ -73,7 +85,7 @@ public class MemberService implements UserDetailsService {
             throw new CustomException(ErrorCode.ACCESS_NOT_VALID);
         }
 
-        if (LocalDateTime.now().isAfter(member.getEmailAuthDue())){
+        if (LocalDateTime.now().isAfter(member.getEmailAuthDue())) {
             throw new CustomException(ErrorCode.ACCESS_NOT_VALID);
         }
 
@@ -101,7 +113,7 @@ public class MemberService implements UserDetailsService {
     public void editPassword(String email, String oldPassword, String newPassword) {
         Member member = getMemberById(email);
 
-        if(member.validatePassword(hashedPassword(oldPassword, member.getPassword()))){
+        if (member.validatePassword(hashedPassword(oldPassword, member.getPassword()))) {
             throw new CustomException(ErrorCode.DATA_NOT_VALID);
         }
 
@@ -112,7 +124,7 @@ public class MemberService implements UserDetailsService {
     public void withdraw(String email, String password) {
         Member member = getMemberById(email);
 
-        if(member.validatePassword(hashedPassword(password, member.getPassword()))){
+        if (member.validatePassword(hashedPassword(password, member.getPassword()))) {
             throw new CustomException(ErrorCode.DATA_NOT_VALID);
         }
 
@@ -124,11 +136,11 @@ public class MemberService implements UserDetailsService {
     public boolean sendEmailToResetPassword(String email) {
         Member member = getMemberById(email);
 
-        if(member.getStatus() == MemberStatus.BEFORE_AUTH){
+        if (member.getStatus() == MemberStatus.BEFORE_AUTH) {
             throw new CustomException(ErrorCode.EMAIL_NOT_AUTHENTICATED);
         }
 
-        if(member.validateKeyAndDue()){
+        if (member.validateKeyAndDue()) {
             throw new CustomException(ErrorCode.ACCESS_NOT_VALID);
         }
 
@@ -153,7 +165,7 @@ public class MemberService implements UserDetailsService {
         Member member = memberRepository.findByPasswordResetKey(key)
             .orElseThrow(() -> new CustomException(ErrorCode.DATA_NOT_VALID));
 
-        if (LocalDateTime.now().isAfter(member.getPasswordResetDue())){
+        if (LocalDateTime.now().isAfter(member.getPasswordResetDue())) {
             throw new CustomException(ErrorCode.ACCESS_NOT_VALID);
         }
 
@@ -176,4 +188,37 @@ public class MemberService implements UserDetailsService {
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
         return getMemberById(email);
     }
+
+    public void validateJwtReissue(String tokenInCache, String refreshToken) {
+        if (!StringUtils.hasText(tokenInCache) || !refreshToken.equals(tokenInCache)) {
+            throw new CustomException(ErrorCode.TOKEN_NOT_VALID);
+        }
+    }
+
+    @Cacheable(value = CacheKey.REFRESH_TOKEN, key = "#username")
+    public String getRefreshToken(String username) {
+        return getRefreshTokenById(username);
+    }
+
+    @CachePut(value = CacheKey.REFRESH_TOKEN, key = "#username")
+    public String putRefreshToken(String username, String token) {
+        return refreshTokenRepository.save(RefreshToken.builder()
+            .username(username)
+            .refreshToken(token)
+            .build()).getRefreshToken();
+    }
+
+    @CacheEvict(value = CacheKey.REFRESH_TOKEN, key = "#username")
+    public String deleteRefreshToken(String username) {
+        String refreshToken = getRefreshTokenById(username);
+        refreshTokenRepository.deleteById(username);
+        return refreshToken;
+    }
+
+    private String getRefreshTokenById(String username) {
+        return refreshTokenRepository.findById(username)
+            .map(e -> e.getRefreshToken())
+            .orElseThrow(() -> new CustomException(ErrorCode.TOKEN_NOT_VALID));
+    }
+
 }

@@ -37,7 +37,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
     @Bean
     UserAuthenticationSuccessHandler getSuccessHandler() {
-        return new UserAuthenticationSuccessHandler(jwtProvider);
+        return new UserAuthenticationSuccessHandler(jwtProvider, memberService);
     }
 
     @Bean
