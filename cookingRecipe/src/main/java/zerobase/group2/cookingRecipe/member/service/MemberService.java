@@ -6,9 +6,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -21,6 +18,7 @@ import zerobase.group2.cookingRecipe.member.component.MailComponent;
 import zerobase.group2.cookingRecipe.member.dto.MemberDto;
 import zerobase.group2.cookingRecipe.member.entity.Member;
 import zerobase.group2.cookingRecipe.member.repository.MemberRepository;
+import zerobase.group2.cookingRecipe.member.type.MemberRole;
 import zerobase.group2.cookingRecipe.member.type.MemberStatus;
 
 @Service
@@ -37,6 +35,8 @@ public class MemberService implements UserDetailsService {
             });
 
         String uuid = UUID.randomUUID().toString();
+        List<String> roles = new ArrayList<>();
+        roles.add(MemberRole.PREFIX + MemberRole.USER);
 
         Member member = memberRepository.save(Member.builder()
             .email(email)
@@ -46,6 +46,8 @@ public class MemberService implements UserDetailsService {
             .emailAuthKey(uuid)
             .emailAuthYn(false)
             .status(MemberStatus.BEFORE_AUTH)
+            .admin(false)
+            .roles(roles)
             .build());
 
         sendEmail(email, uuid);
@@ -81,22 +83,6 @@ public class MemberService implements UserDetailsService {
         member.setEmailAuthYn(true);
         member.setEmailAuthDue(LocalDateTime.now());
         memberRepository.save(member);
-    }
-
-    @Override
-    public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
-        Member member = getMemberById(email);
-
-//        logInValidate(member);
-
-        List<GrantedAuthority> grantedAuthorities = new ArrayList<>();
-        grantedAuthorities.add(new SimpleGrantedAuthority("ROLE_USER"));
-
-//        if (member.isAdminYn()) {
-//            grantedAuthorities.add(new SimpleGrantedAuthority("ROLE_ADMIN"));
-//        }
-
-        return new User(member.getEmail(), member.getPassword(), grantedAuthorities);
     }
 
     public MemberDto getInfoById(String email) {
@@ -183,5 +169,10 @@ public class MemberService implements UserDetailsService {
 
         member.setPassword(hashedPassword(password, BCrypt.gensalt()));
         memberRepository.save(member);
+    }
+
+    @Override
+    public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
+        return getMemberById(email);
     }
 }
