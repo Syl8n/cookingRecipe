@@ -1,7 +1,9 @@
 package zerobase.group2.cookingRecipe.member.controller;
 
+import java.util.stream.Collectors;
 import javax.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -17,7 +19,6 @@ import zerobase.group2.cookingRecipe.member.dto.JwtIssue;
 import zerobase.group2.cookingRecipe.member.dto.MemberDto;
 import zerobase.group2.cookingRecipe.member.dto.MemberRegister;
 import zerobase.group2.cookingRecipe.member.dto.ResetPassword;
-import zerobase.group2.cookingRecipe.member.entity.Member;
 import zerobase.group2.cookingRecipe.member.service.MemberService;
 
 @RestController
@@ -40,15 +41,20 @@ public class AuthController {
 
     @PostMapping("/reissue")
     public ResponseResult reissue(@RequestBody @Valid JwtIssue request) {
-        if(!jwtProvider.validateToken(request.getRefreshToken())){
+        if(!jwtProvider.validateRefreshToken(request.getRefreshToken())){
             throw new CustomException(ErrorCode.TOKEN_NOT_VALID);
         }
-        Member member = memberService.attemptJwtReissue(jwtProvider.getAuthentication(
-            request.getAccessToken()).getName(), request.getRefreshToken());
 
-        JwtIssue jwtIssue = jwtProvider.generateTokens(member.getEmail(), member.getRoles());
+        Authentication authentication = jwtProvider.getAuthentication(request.getAccessToken());
+        String tokenInCache = memberService.getRefreshToken(authentication.getName());
 
-        memberService.putRefreshToken(member.getEmail(), jwtIssue.getRefreshToken());
+        memberService.validateJwtReissue(tokenInCache, request.getRefreshToken());
+
+        JwtIssue jwtIssue = jwtProvider.generateTokens(authentication.getName(),
+            authentication.getAuthorities().stream().map(Object::toString).collect(
+            Collectors.toList()));
+
+        memberService.putRefreshToken(authentication.getName(), jwtIssue.getRefreshToken());
 
         return ResponseResult.ok(jwtIssue);
     }

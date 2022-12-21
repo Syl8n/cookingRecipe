@@ -3,7 +3,6 @@ package zerobase.group2.cookingRecipe.Security.config;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -30,7 +29,6 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     private final MemberService memberService;
     private final JwtAuthFilter jwtAuthFilter;
     private final JwtProvider jwtProvider;
-    private final RedisTemplate redisTemplate;
 
     @Bean
     PasswordEncoder getPasswordEncoder() {
@@ -39,7 +37,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
     @Bean
     UserAuthenticationSuccessHandler getSuccessHandler() {
-        return new UserAuthenticationSuccessHandler(jwtProvider, redisTemplate);
+        return new UserAuthenticationSuccessHandler(jwtProvider, memberService);
     }
 
     @Bean

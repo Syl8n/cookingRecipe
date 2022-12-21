@@ -74,6 +74,17 @@ public class JwtProvider {
         return true;
     }
 
+    public boolean validateRefreshToken(String token) {
+        if (!StringUtils.hasText(token)) {
+            return false;
+        }
+        Claims claims = getClaims(token);
+        if (claims == null) {
+            return false;
+        }
+        return true;
+    }
+
     public Authentication getAuthentication(String token) {
         UserDetails userDetails = memberService.loadUserByUsername(getUserName(token));
 
