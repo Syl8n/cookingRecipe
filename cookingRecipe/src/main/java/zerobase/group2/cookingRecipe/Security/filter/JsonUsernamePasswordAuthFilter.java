@@ -1,4 +1,4 @@
-package zerobase.group2.cookingRecipe.Security;
+package zerobase.group2.cookingRecipe.Security.filter;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -21,7 +21,7 @@ public class JsonUsernamePasswordAuthFilter extends AbstractAuthenticationProces
     public static final String USERNAME = "username";
     public static final String PASSWORD = "password";
 
-    protected JsonUsernamePasswordAuthFilter(String defaultFilterProcessesUrl) {
+    public JsonUsernamePasswordAuthFilter(String defaultFilterProcessesUrl) {
         super(defaultFilterProcessesUrl);
     }
 

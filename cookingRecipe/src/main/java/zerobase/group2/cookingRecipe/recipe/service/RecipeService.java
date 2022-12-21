@@ -11,6 +11,7 @@ import zerobase.group2.cookingRecipe.common.exception.CustomException;
 import zerobase.group2.cookingRecipe.common.type.ErrorCode;
 import zerobase.group2.cookingRecipe.member.entity.Member;
 import zerobase.group2.cookingRecipe.member.repository.MemberRepository;
+import zerobase.group2.cookingRecipe.member.type.MemberStatus;
 import zerobase.group2.cookingRecipe.recipe.Entity.Recipe;
 import zerobase.group2.cookingRecipe.recipe.dto.RecipeDto;
 import zerobase.group2.cookingRecipe.recipe.repository.RecipeRepository;
@@ -30,7 +31,7 @@ public class RecipeService {
         String mainImagePathBig, String type1, String type2, String ingredients,
         double kcal, List<String> manual, List<String> manualImagePath, String email) {
 
-        validateUser(email);
+        validateWriter(email);
 
         return RecipeDto.from(recipeRepository.save(
             Recipe.builder()
@@ -151,9 +152,10 @@ public class RecipeService {
         }
     }
 
-    private void validateUser(String email) {
-        memberRepository.findById(email)
+    private void validateWriter(String email) {
+        Member member = memberRepository.findById(email)
             .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
+        validateMember(member);
     }
 
     private void validateEditor(Member member, Recipe recipe) {
@@ -168,7 +170,15 @@ public class RecipeService {
     }
 
     private Member getUserById(String email) {
-        return memberRepository.findById(email)
+        Member member = memberRepository.findById(email)
             .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
+        validateMember(member);
+        return member;
+    }
+
+    private void validateMember(Member member) {
+        if(member.getStatus() == MemberStatus.BEFORE_AUTH){
+            throw new CustomException(ErrorCode.EMAIL_NOT_AUTHENTICATED);
+        }
     }
 }

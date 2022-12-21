@@ -10,6 +10,7 @@ import zerobase.group2.cookingRecipe.common.exception.CustomException;
 import zerobase.group2.cookingRecipe.common.type.ErrorCode;
 import zerobase.group2.cookingRecipe.member.entity.Member;
 import zerobase.group2.cookingRecipe.member.repository.MemberRepository;
+import zerobase.group2.cookingRecipe.member.type.MemberStatus;
 import zerobase.group2.cookingRecipe.recipe.Entity.Recipe;
 import zerobase.group2.cookingRecipe.recipe.repository.RecipeRepository;
 
@@ -67,8 +68,17 @@ public class CommentService {
     }
 
     private Member getMemberById(String email) {
-        return memberRepository.findById(email)
+        Member member = memberRepository.findById(email)
             .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
+        validateMember(member);
+
+        return member;
+    }
+
+    private void validateMember(Member member) {
+        if(member.getStatus() == MemberStatus.BEFORE_AUTH){
+            throw new CustomException(ErrorCode.EMAIL_NOT_AUTHENTICATED);
+        }
     }
 
     private Recipe getRecipeById(String recipeId) {

@@ -28,6 +28,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import zerobase.group2.cookingRecipe.comment.entity.Comment;
 import zerobase.group2.cookingRecipe.common.converter.ListToStringAndViceVersaConverter;
 import zerobase.group2.cookingRecipe.like.entity.LikeEntity;
+import zerobase.group2.cookingRecipe.member.type.MemberRole;
 import zerobase.group2.cookingRecipe.member.type.MemberStatus;
 import zerobase.group2.cookingRecipe.rating.Entity.Rating;
 
@@ -50,12 +51,9 @@ public class Member implements UserDetails {
 
     private String emailAuthKey;
     private LocalDateTime emailAuthDue;
-    private boolean emailAuthYn;
 
     private String passwordResetKey;
     private LocalDateTime passwordResetDue;
-
-    private boolean admin;
 
     @Convert(converter = ListToStringAndViceVersaConverter.class)
     private List<String> roles;
@@ -92,6 +90,10 @@ public class Member implements UserDetails {
             && LocalDateTime.now().isBefore(passwordResetDue);
     }
 
+    public boolean isAdmin() {
+        return roles.contains(MemberRole.ADMIN);
+    }
+
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return roles.stream().map(SimpleGrantedAuthority::new)
@@ -120,6 +122,6 @@ public class Member implements UserDetails {
 
     @Override
     public boolean isEnabled() {
-        return true;
+        return status != MemberStatus.WITHDRAW;
     }
 }

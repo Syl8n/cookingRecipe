@@ -1,4 +1,4 @@
-package zerobase.group2.cookingRecipe.Security;
+package zerobase.group2.cookingRecipe.Security.filter;
 
 import java.io.IOException;
 import javax.servlet.FilterChain;
@@ -12,6 +12,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
+import zerobase.group2.cookingRecipe.Security.authProvider.JwtProvider;
 
 @Component
 @RequiredArgsConstructor

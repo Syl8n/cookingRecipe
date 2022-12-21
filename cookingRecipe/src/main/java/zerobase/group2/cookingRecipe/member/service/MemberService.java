@@ -44,9 +44,7 @@ public class MemberService implements UserDetailsService {
             .password(hashedPassword(password, BCrypt.gensalt()))
             .emailAuthDue(LocalDateTime.now().plusHours(1))
             .emailAuthKey(uuid)
-            .emailAuthYn(false)
             .status(MemberStatus.BEFORE_AUTH)
-            .admin(false)
             .roles(roles)
             .build());
 
@@ -71,7 +69,7 @@ public class MemberService implements UserDetailsService {
         Member member = memberRepository.findByEmailAuthKey(key)
             .orElseThrow(() -> new CustomException(ErrorCode.DATA_NOT_VALID));
 
-        if (member.isEmailAuthYn()) {
+        if (member.getStatus() != MemberStatus.BEFORE_AUTH) {
             throw new CustomException(ErrorCode.ACCESS_NOT_VALID);
         }
 
@@ -80,7 +78,6 @@ public class MemberService implements UserDetailsService {
         }
 
         member.setStatus(MemberStatus.IN_USE);
-        member.setEmailAuthYn(true);
         member.setEmailAuthDue(LocalDateTime.now());
         memberRepository.save(member);
     }
@@ -127,6 +124,10 @@ public class MemberService implements UserDetailsService {
     public boolean sendEmailToResetPassword(String email) {
         Member member = getMemberById(email);
 
+        if(member.getStatus() == MemberStatus.BEFORE_AUTH){
+            throw new CustomException(ErrorCode.EMAIL_NOT_AUTHENTICATED);
+        }
+
         if(member.validateKeyAndDue()){
             throw new CustomException(ErrorCode.ACCESS_NOT_VALID);
         }
@@ -158,7 +159,7 @@ public class MemberService implements UserDetailsService {
 
         member.setPasswordResetKey("");
         member.setPasswordResetDue(LocalDateTime.now());
-        member.setEmailAuthYn(true);
+        member.setStatus(MemberStatus.IN_USE);
         memberRepository.save(member);
 
         return member.getEmail();

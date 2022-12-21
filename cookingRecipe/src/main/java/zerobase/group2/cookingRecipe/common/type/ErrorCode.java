@@ -16,6 +16,7 @@ public enum ErrorCode {
     RECIPE_NOT_LIKED("좋아요를 하지 않은 레시피입니다."),
     COMMENT_NOT_FOUND("댓글 정보가 존재하지 않습니다."),
     RATING_NOT_FOUND("평점 정보가 존재하지 않습니다."),
+    EMAIL_NOT_AUTHENTICATED("이메일 인증이 되지 않았습니다.")
 ;
     private final String description;
 }

@@ -1,4 +1,4 @@
-package zerobase.group2.cookingRecipe.Security;
+package zerobase.group2.cookingRecipe.Security.authProvider;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
@@ -45,7 +45,6 @@ public class JwtProvider {
     }
 
     public boolean validateToken(String token) {
-        System.out.println("진짜키 : " + SECRET_KEY);
         if (!StringUtils.hasText(token)) {
             return false;
         }

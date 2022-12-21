@@ -27,6 +27,7 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
+import zerobase.group2.cookingRecipe.Security.authProvider.JwtProvider;
 import zerobase.group2.cookingRecipe.member.entity.Member;
 
 @ExtendWith(SpringExtension.class)
@@ -72,7 +73,6 @@ class JwtProviderTest {
     @Test
     @DisplayName("토큰 유효성 검증 성공")
     void success_validateToken() {
-        System.out.println("테스트키 : " + SECRET_KEY);
         //given
         String token = generateToken(member, EXPIRE_TIME, SECRET_KEY);
 

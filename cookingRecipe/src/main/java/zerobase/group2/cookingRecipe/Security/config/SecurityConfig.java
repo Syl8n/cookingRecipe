@@ -1,4 +1,4 @@
-package zerobase.group2.cookingRecipe.Security;
+package zerobase.group2.cookingRecipe.Security.config;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
@@ -12,6 +12,10 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import zerobase.group2.cookingRecipe.Security.authProvider.JwtProvider;
+import zerobase.group2.cookingRecipe.Security.filter.JsonUsernamePasswordAuthFilter;
+import zerobase.group2.cookingRecipe.Security.filter.JwtAuthFilter;
+import zerobase.group2.cookingRecipe.Security.postHandler.UserAuthenticationSuccessHandler;
 import zerobase.group2.cookingRecipe.member.service.MemberService;
 import zerobase.group2.cookingRecipe.member.type.MemberRole;
 

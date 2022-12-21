@@ -1,7 +1,6 @@
 package zerobase.group2.cookingRecipe.member.service;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -20,13 +19,13 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.springframework.security.crypto.bcrypt.BCrypt;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
+import zerobase.group2.cookingRecipe.common.exception.CustomException;
+import zerobase.group2.cookingRecipe.common.type.ErrorCode;
 import zerobase.group2.cookingRecipe.member.component.MailComponent;
 import zerobase.group2.cookingRecipe.member.dto.MemberDto;
 import zerobase.group2.cookingRecipe.member.entity.Member;
-import zerobase.group2.cookingRecipe.common.exception.CustomException;
 import zerobase.group2.cookingRecipe.member.repository.MemberRepository;
 import zerobase.group2.cookingRecipe.member.type.MemberStatus;
-import zerobase.group2.cookingRecipe.common.type.ErrorCode;
 
 @ExtendWith(SpringExtension.class)
 class MemberServiceTest {
@@ -48,7 +47,6 @@ class MemberServiceTest {
             .name("g2")
             .emailAuthKey(UUID.randomUUID().toString())
             .emailAuthDue(LocalDateTime.now().plusMinutes(1))
-            .emailAuthYn(false)
             .status(MemberStatus.BEFORE_AUTH)
             .registeredAt(LocalDateTime.now())
             .updatedAt(LocalDateTime.now())
@@ -100,7 +98,6 @@ class MemberServiceTest {
         memberService.emailAuth(member.getEmailAuthKey());
 
         //then
-        assertTrue(member.isEmailAuthYn());
         assertEquals(MemberStatus.IN_USE, member.getStatus());
     }
 
@@ -127,7 +124,7 @@ class MemberServiceTest {
         CustomException exception = assertThrows(CustomException.class, () ->
             memberService.emailAuth(member.getEmailAuthKey()));
         //then
-        assertFalse(member.isEmailAuthYn());
+        assertEquals(MemberStatus.BEFORE_AUTH, member.getStatus());
         assertEquals(ErrorCode.ACCESS_NOT_VALID, exception.getError());
     }
 
@@ -135,7 +132,7 @@ class MemberServiceTest {
     @DisplayName("이메일 인증 실패 - 이미 인증된 계정")
     void failedEmailAuth_alreadyAuthenticated() {
         //given
-        member.setEmailAuthYn(true);
+        member.setStatus(MemberStatus.IN_USE);
         given(memberRepository.findByEmailAuthKey(anyString()))
             .willReturn(Optional.of(member));
         //when
@@ -143,7 +140,6 @@ class MemberServiceTest {
             memberService.emailAuth(member.getEmailAuthKey()));
         //then
         assertTrue(LocalDateTime.now().isBefore(member.getEmailAuthDue()));
-        assertTrue(member.isEmailAuthYn());
         assertEquals(ErrorCode.ACCESS_NOT_VALID, exception.getError());
     }
 
@@ -325,7 +321,6 @@ class MemberServiceTest {
     void success_resetAuth() {
         //given
         member.setPasswordResetKey("1111");
-        member.setEmailAuthYn(false);
         member.setPasswordResetDue(LocalDateTime.now().plusHours(1));
         given(memberRepository.findByPasswordResetKey(anyString()))
             .willReturn(Optional.of(member));
@@ -336,7 +331,6 @@ class MemberServiceTest {
         assertEquals(member.getEmail(), email);
         assertEquals("", member.getPasswordResetKey());
         assertTrue(LocalDateTime.now().plusMinutes(1).isAfter(member.getPasswordResetDue()));
-        assertTrue(member.isEmailAuthYn());
     }
 
     @Test

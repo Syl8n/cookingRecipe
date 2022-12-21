@@ -1,4 +1,4 @@
-package zerobase.group2.cookingRecipe.Security;
+package zerobase.group2.cookingRecipe.Security.postHandler;
 
 import java.io.IOException;
 import java.io.Writer;
@@ -9,6 +9,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationSuccessHandler;
+import zerobase.group2.cookingRecipe.Security.authProvider.JwtProvider;
 
 @RequiredArgsConstructor
 public class UserAuthenticationSuccessHandler extends SimpleUrlAuthenticationSuccessHandler {
