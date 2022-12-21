@@ -5,13 +5,17 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCrypt;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
+import zerobase.group2.cookingRecipe.cache.CacheKey;
 import zerobase.group2.cookingRecipe.common.exception.CustomException;
 import zerobase.group2.cookingRecipe.common.type.ErrorCode;
 import zerobase.group2.cookingRecipe.member.component.MailComponent;
@@ -27,6 +31,8 @@ import zerobase.group2.cookingRecipe.member.type.MemberStatus;
 public class MemberService implements UserDetailsService {
     private final MemberRepository memberRepository;
     private final MailComponent mailComponent;
+
+    private final RedisTemplate<String, String> redisTemplate;
 
     public MemberDto register(String email, String password, String name) {
         memberRepository.findById(email)
@@ -176,4 +182,32 @@ public class MemberService implements UserDetailsService {
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
         return getMemberById(email);
     }
+
+    public Member attemptJwtReissue(String email, String refreshToken) {
+        Member member = getMemberById(email);
+
+        String tokenInCache = getRefreshToken(member.getEmail());
+
+        if(!StringUtils.hasText(tokenInCache) || !refreshToken.equals(tokenInCache)){
+            throw new CustomException(ErrorCode.TOKEN_NOT_VALID);
+        }
+
+        return member;
+    }
+
+    public String getRefreshToken(String email) {
+        return redisTemplate.opsForValue()
+            .get(CacheKey.REFRESH_TOKEN + "::" + email);
+    }
+
+    public void putRefreshToken(String email, String token){
+        redisTemplate.opsForValue()
+            .set(CacheKey.REFRESH_TOKEN + "::" + email, token, CacheKey.DEFAULT_EXPIRE_SEC, TimeUnit.SECONDS);
+    }
+
+    public String deleteRefreshToken(String email) {
+        return redisTemplate.opsForValue()
+            .getAndDelete(CacheKey.REFRESH_TOKEN + "::" + email);
+    }
+
 }

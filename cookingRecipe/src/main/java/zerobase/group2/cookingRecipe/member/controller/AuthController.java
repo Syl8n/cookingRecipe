@@ -9,10 +9,15 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import zerobase.group2.cookingRecipe.Security.authProvider.JwtProvider;
+import zerobase.group2.cookingRecipe.common.exception.CustomException;
 import zerobase.group2.cookingRecipe.common.model.ResponseResult;
+import zerobase.group2.cookingRecipe.common.type.ErrorCode;
+import zerobase.group2.cookingRecipe.member.dto.JwtIssue;
 import zerobase.group2.cookingRecipe.member.dto.MemberDto;
 import zerobase.group2.cookingRecipe.member.dto.MemberRegister;
 import zerobase.group2.cookingRecipe.member.dto.ResetPassword;
+import zerobase.group2.cookingRecipe.member.entity.Member;
 import zerobase.group2.cookingRecipe.member.service.MemberService;
 
 @RestController
@@ -21,6 +26,7 @@ import zerobase.group2.cookingRecipe.member.service.MemberService;
 public class AuthController {
 
     private final MemberService memberService;
+    private final JwtProvider jwtProvider;
 
     @PostMapping("/register")
     public ResponseResult register(@RequestBody @Valid MemberRegister.Request request) {
@@ -30,6 +36,21 @@ public class AuthController {
             request.getName()
         );
         return ResponseResult.ok(MemberRegister.Response.from(memberDto));
+    }
+
+    @PostMapping("/reissue")
+    public ResponseResult reissue(@RequestBody @Valid JwtIssue request) {
+        if(!jwtProvider.validateToken(request.getRefreshToken())){
+            throw new CustomException(ErrorCode.TOKEN_NOT_VALID);
+        }
+        Member member = memberService.attemptJwtReissue(jwtProvider.getAuthentication(
+            request.getAccessToken()).getName(), request.getRefreshToken());
+
+        JwtIssue jwtIssue = jwtProvider.generateTokens(member.getEmail(), member.getRoles());
+
+        memberService.putRefreshToken(member.getEmail(), jwtIssue.getRefreshToken());
+
+        return ResponseResult.ok(jwtIssue);
     }
 
     @GetMapping("/email-auth")
