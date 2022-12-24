@@ -1,5 +1,6 @@
 package zerobase.group2.cookingRecipe.rating.service;
 
+import java.time.LocalDateTime;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -22,14 +23,19 @@ public class RatingService {
     private final MemberRepository memberRepository;
     private final RecipeRepository recipeRepository;
 
-    public RatingDto rateRecipe(String email, String recipeId, int score) {
+    public RatingDto rateRecipe(String email, long recipeId, int score) {
         Member member = getMemberById(email);
         Recipe recipe = getRecipeById(recipeId);
+
+        if(ratingRepository.existsByMemberAndRecipe(member, recipe)){
+            throw new CustomException(ErrorCode.RECIPE_ALREADY_RATED);
+        }
 
         Rating rating = ratingRepository.save(Rating.builder()
             .member(member)
             .recipe(recipe)
             .score(score)
+            .createdAt(LocalDateTime.now())
             .build()
         );
 
@@ -40,7 +46,7 @@ public class RatingService {
         return RatingDto.from(rating);
     }
 
-    public RatingDto updateRateRecipe(String email, String recipeId, int newScore) {
+    public RatingDto updateRateRecipe(String email, long recipeId, int newScore) {
         Member member = getMemberById(email);
         Recipe recipe = getRecipeById(recipeId);
 
@@ -70,7 +76,7 @@ public class RatingService {
         }
     }
 
-    private Recipe getRecipeById(String recipeId) {
+    private Recipe getRecipeById(long recipeId) {
         return recipeRepository.findById(recipeId)
             .orElseThrow(() -> new CustomException(ErrorCode.RECIPE_NOT_FOUND));
     }

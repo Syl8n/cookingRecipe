@@ -3,6 +3,7 @@ package zerobase.group2.cookingRecipe.recipe.service;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.verify;
@@ -76,7 +77,8 @@ class RecipeServiceTest {
             Arrays.asList("manualImage1", "manualImage2", "manualImage3")
         );
         recipe = Recipe.builder()
-            .id(UUID.randomUUID().toString().replace("-", ""))
+            .id(1L)
+            .visualId(UUID.randomUUID().toString().replace("-", ""))
             .title(request.getTitle())
             .mainImagePathBig(request.getMainImagePathBig())
             .mainImagePathSmall(request.getMainImagePathSmall())
@@ -163,13 +165,13 @@ class RecipeServiceTest {
     @DisplayName("레시피 조회 성공 - 조회수 증가")
     void success_readRecipe() {
         //given
-        given(recipeRepository.findById(anyString()))
+        given(recipeRepository.findByVisualId(anyString()))
             .willReturn(Optional.of(recipe));
         //when
         RecipeDto recipeDto = recipeService.readRecipe("id", httpRequest.getCookies(), httpResponse);
 
         //then
-        assertEquals(recipe.getId(), recipeDto.getId());
+        assertEquals(recipe.getVisualId(), recipeDto.getVisualId());
         assertEquals(recipe.getTitle(), recipeDto.getTitle());
         assertEquals(recipe.getMainImagePathBig(), recipeDto.getMainImagePathBig());
         assertEquals(recipe.getMainImagePathSmall(), recipeDto.getMainImagePathSmall());
@@ -187,14 +189,14 @@ class RecipeServiceTest {
     @DisplayName("레시피 조회 성공 - 조회수 중복 방지")
     void success_readRecipe_viewsNotIncrease() {
         //given
-        given(recipeRepository.findById(anyString()))
+        given(recipeRepository.findByVisualId(anyString()))
             .willReturn(Optional.of(recipe));
         //when
-        Cookie[] cookies = new Cookie[]{new Cookie("recipeView", "[" + recipe.getId() + "]")};
+        Cookie[] cookies = new Cookie[]{new Cookie("recipeView", "[" + recipe.getVisualId() + "]")};
         RecipeDto recipeDto = recipeService.readRecipe("id", cookies, httpResponse);
 
         //then
-        assertEquals(recipe.getId(), recipeDto.getId());
+        assertEquals(recipe.getVisualId(), recipeDto.getVisualId());
         assertEquals(recipe.getTitle(), recipeDto.getTitle());
         assertEquals(recipe.getMainImagePathBig(), recipeDto.getMainImagePathBig());
         assertEquals(recipe.getMainImagePathSmall(), recipeDto.getMainImagePathSmall());
@@ -212,7 +214,7 @@ class RecipeServiceTest {
     @DisplayName("레시피 조회 실패 - 존재하지 않는 레시피")
     void fail_readRecipe_recipeNotFound() {
         //given
-        given(recipeRepository.findById(anyString()))
+        given(recipeRepository.findByVisualId(anyString()))
             .willReturn(Optional.empty());
 
         //when
@@ -229,7 +231,7 @@ class RecipeServiceTest {
     void fail_readRecipe_recipeUnregistered() {
         //given
         recipe.setStatus(RecipeStatus.UNREGISTERED);
-        given(recipeRepository.findById(anyString()))
+        given(recipeRepository.findByVisualId(anyString()))
             .willReturn(Optional.of(recipe));
 
         //when
@@ -247,14 +249,14 @@ class RecipeServiceTest {
         //given
         given(memberRepository.findById(anyString()))
             .willReturn(Optional.of(member1));
-        given(recipeRepository.findById(anyString()))
+        given(recipeRepository.findByVisualId(anyString()))
             .willReturn(Optional.of(recipe));
 
         //when
         String recipeId = recipeService.checkAuthorityToEditRecipe("id", "email");
 
         //then
-        assertEquals(recipe.getId(), recipeId);
+        assertEquals(recipe.getVisualId(), recipeId);
     }
 
     @Test
@@ -278,7 +280,7 @@ class RecipeServiceTest {
         //given
         given(memberRepository.findById(anyString()))
             .willReturn(Optional.of(member1));
-        given(recipeRepository.findById(anyString()))
+        given(recipeRepository.findByVisualId(anyString()))
             .willReturn(Optional.empty());
 
         //when
@@ -296,7 +298,7 @@ class RecipeServiceTest {
         recipe.setStatus(RecipeStatus.UNREGISTERED);
         given(memberRepository.findById(anyString()))
             .willReturn(Optional.of(member1));
-        given(recipeRepository.findById(anyString()))
+        given(recipeRepository.findByVisualId(anyString()))
             .willReturn(Optional.of(recipe));
 
         //when
@@ -313,7 +315,7 @@ class RecipeServiceTest {
         //given
         given(memberRepository.findById(anyString()))
             .willReturn(Optional.of(member2));
-        given(recipeRepository.findById(anyString()))
+        given(recipeRepository.findByVisualId(anyString()))
             .willReturn(Optional.of(recipe));
 
         //when
@@ -330,7 +332,7 @@ class RecipeServiceTest {
         //given
         given(memberRepository.findById(anyString()))
             .willReturn(Optional.of(member1));
-        given(recipeRepository.findById(anyString()))
+        given(recipeRepository.findById(anyLong()))
             .willReturn(Optional.of(recipe));
         given(recipeRepository.save(any()))
             .willReturn(recipe);
@@ -412,7 +414,7 @@ class RecipeServiceTest {
         //given
         given(memberRepository.findById(anyString()))
             .willReturn(Optional.of(member1));
-        given(recipeRepository.findById(anyString()))
+        given(recipeRepository.findById(anyLong()))
             .willReturn(Optional.empty());
 
         //when
@@ -443,7 +445,7 @@ class RecipeServiceTest {
         recipe.setStatus(RecipeStatus.UNREGISTERED);
         given(memberRepository.findById(anyString()))
             .willReturn(Optional.of(member1));
-        given(recipeRepository.findById(anyString()))
+        given(recipeRepository.findById(anyLong()))
             .willReturn(Optional.of(recipe));
 
         //when
@@ -473,7 +475,7 @@ class RecipeServiceTest {
         //given
         given(memberRepository.findById(anyString()))
             .willReturn(Optional.of(member2));
-        given(recipeRepository.findById(anyString()))
+        given(recipeRepository.findById(anyLong()))
             .willReturn(Optional.of(recipe));
 
         //when
@@ -503,7 +505,7 @@ class RecipeServiceTest {
         //given
         given(memberRepository.findById(anyString()))
             .willReturn(Optional.of(member1));
-        given(recipeRepository.findById(anyString()))
+        given(recipeRepository.findByVisualId(anyString()))
             .willReturn(Optional.of(recipe));
         given(recipeRepository.save(any()))
             .willReturn(recipe);
@@ -511,7 +513,7 @@ class RecipeServiceTest {
         ArgumentCaptor<Recipe> captor = ArgumentCaptor.forClass(Recipe.class);
 
         //when
-        recipeService.deleteRecipe(recipe.getId(), "email");
+        recipeService.deleteRecipe(recipe.getVisualId(), "email");
 
         //then
         verify(recipeRepository).save(captor.capture());
@@ -540,7 +542,7 @@ class RecipeServiceTest {
         //given
         given(memberRepository.findById(anyString()))
             .willReturn(Optional.of(member1));
-        given(recipeRepository.findById(anyString()))
+        given(recipeRepository.findByVisualId(anyString()))
             .willReturn(Optional.empty());
 
         //when
@@ -558,7 +560,7 @@ class RecipeServiceTest {
         given(memberRepository.findById(anyString()))
             .willReturn(Optional.of(member1));
         recipe.setStatus(RecipeStatus.UNREGISTERED);
-        given(recipeRepository.findById(anyString()))
+        given(recipeRepository.findByVisualId(anyString()))
             .willReturn(Optional.of(recipe));
 
         //when
@@ -575,7 +577,7 @@ class RecipeServiceTest {
         //given
         given(memberRepository.findById(anyString()))
             .willReturn(Optional.of(member2));
-        given(recipeRepository.findById(anyString()))
+        given(recipeRepository.findByVisualId(anyString()))
             .willReturn(Optional.of(recipe));
 
         //when

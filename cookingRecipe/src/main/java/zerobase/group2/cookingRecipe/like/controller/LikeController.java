@@ -18,13 +18,13 @@ public class LikeController {
     private final LikeService likeService;
 
     @PostMapping("/{recipeId}")
-    public ResponseResult likeRecipe(@PathVariable String recipeId,
+    public ResponseResult likeRecipe(@PathVariable long recipeId,
         Principal principal){
         return ResponseResult.ok(likeService.likeRecipe(recipeId, principal.getName()));
     }
 
     @DeleteMapping("/{recipeId}")
-    public ResponseResult dislikeRecipe(@PathVariable String recipeId,
+    public ResponseResult dislikeRecipe(@PathVariable long recipeId,
         Principal principal){
         return ResponseResult.ok(likeService.dislikeRecipe(recipeId, principal.getName()));
     }

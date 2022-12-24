@@ -10,5 +10,5 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class MemberRecipeCompKey implements Serializable {
     private String member;
-    private String recipe;
+    private Long recipe;
 }

@@ -13,7 +13,6 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import zerobase.group2.cookingRecipe.member.entity.Member;
 import zerobase.group2.cookingRecipe.member.entity.MemberRecipeCompKey;
@@ -24,7 +23,7 @@ import zerobase.group2.cookingRecipe.recipe.Entity.Recipe;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-@Entity
+@Entity(name = "like_table")
 @EntityListeners(AuditingEntityListener.class)
 @IdClass(MemberRecipeCompKey.class)
 public class LikeEntity {
@@ -40,6 +39,5 @@ public class LikeEntity {
     @JoinColumn(name = "recipe_id", nullable = false)
     private Recipe recipe;
 
-    @CreatedDate
     private LocalDateTime createdAt;
 }

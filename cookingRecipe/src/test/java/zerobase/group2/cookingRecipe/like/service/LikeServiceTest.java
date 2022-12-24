@@ -3,6 +3,7 @@ package zerobase.group2.cookingRecipe.like.service;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.verify;
@@ -54,7 +55,7 @@ class LikeServiceTest {
             .name("g2")
             .build();
         recipe = Recipe.builder()
-            .id(UUID.randomUUID().toString().replace("-", ""))
+            .visualId(UUID.randomUUID().toString().replace("-", ""))
             .title("recipe title")
             .mainImagePathBig("bigImagePath")
             .mainImagePathSmall("smallImagePath")
@@ -80,7 +81,7 @@ class LikeServiceTest {
         //given
         given(memberRepository.findById(anyString()))
             .willReturn(Optional.of(member));
-        given(recipeRepository.findById(anyString()))
+        given(recipeRepository.findById(anyLong()))
             .willReturn(Optional.of(recipe));
         given(likeRepository.save(any()))
             .willReturn(like);
@@ -88,7 +89,7 @@ class LikeServiceTest {
         ArgumentCaptor<Recipe> recipeCaptor = ArgumentCaptor.forClass(Recipe.class);
 
         //when
-        likeService.likeRecipe("recipeId", "memberEmail");
+        likeService.likeRecipe(1L, "memberEmail");
 
         //then
         verify(likeRepository).save(captor.capture());
@@ -108,7 +109,7 @@ class LikeServiceTest {
             .willReturn(Optional.empty());
         //when
         CustomException exception = assertThrows(CustomException.class, () ->
-            likeService.likeRecipe("recipeId", "memberEmail"));
+            likeService.likeRecipe(1L, "memberEmail"));
 
         //then
         assertEquals(ErrorCode.USER_NOT_FOUND, exception.getError());
@@ -120,11 +121,11 @@ class LikeServiceTest {
         //given
         given(memberRepository.findById(anyString()))
             .willReturn(Optional.of(member));
-        given(recipeRepository.findById(anyString()))
+        given(recipeRepository.findById(anyLong()))
             .willReturn(Optional.empty());
         //when
         CustomException exception = assertThrows(CustomException.class, () ->
-            likeService.likeRecipe("recipeId", "memberEmail"));
+            likeService.likeRecipe(1L, "memberEmail"));
 
         //then
         assertEquals(ErrorCode.RECIPE_NOT_FOUND, exception.getError());
@@ -136,13 +137,13 @@ class LikeServiceTest {
         //given
         given(memberRepository.findById(anyString()))
             .willReturn(Optional.of(member));
-        given(recipeRepository.findById(anyString()))
+        given(recipeRepository.findById(anyLong()))
             .willReturn(Optional.of(recipe));
         given(likeRepository.existsByMemberAndRecipe(any(), any()))
             .willReturn(true);
         //when
         CustomException exception = assertThrows(CustomException.class, () ->
-            likeService.likeRecipe("recipeId", "memberEmail"));
+            likeService.likeRecipe(1L, "memberEmail"));
 
         //then
         assertEquals(ErrorCode.RECIPE_ALREADY_LIKED, exception.getError());
@@ -154,13 +155,13 @@ class LikeServiceTest {
         //given
         given(memberRepository.findById(anyString()))
             .willReturn(Optional.of(member));
-        given(recipeRepository.findById(anyString()))
+        given(recipeRepository.findById(anyLong()))
             .willReturn(Optional.of(recipe));
         given(likeRepository.findByMemberAndRecipe(any(), any()))
             .willReturn(Optional.of(like));
 
         //when
-        likeService.dislikeRecipe("recipeId", "memberEmail");
+        likeService.dislikeRecipe(1L, "memberEmail");
 
         //then
         verify(likeRepository).delete(like);
@@ -177,7 +178,7 @@ class LikeServiceTest {
 
         //when
         CustomException exception = assertThrows(CustomException.class, () ->
-            likeService.dislikeRecipe("recipeId", "memberEmail"));
+            likeService.dislikeRecipe(1L, "memberEmail"));
 
         //then
         assertEquals(ErrorCode.USER_NOT_FOUND, exception.getError());
@@ -189,12 +190,12 @@ class LikeServiceTest {
         //given
         given(memberRepository.findById(anyString()))
             .willReturn(Optional.of(member));
-        given(recipeRepository.findById(anyString()))
+        given(recipeRepository.findById(anyLong()))
             .willReturn(Optional.empty());
 
         //when
         CustomException exception = assertThrows(CustomException.class, () ->
-            likeService.dislikeRecipe("recipeId", "memberEmail"));
+            likeService.dislikeRecipe(1L, "memberEmail"));
 
         //then
         assertEquals(ErrorCode.RECIPE_NOT_FOUND, exception.getError());
@@ -206,14 +207,14 @@ class LikeServiceTest {
         //given
         given(memberRepository.findById(anyString()))
             .willReturn(Optional.of(member));
-        given(recipeRepository.findById(anyString()))
+        given(recipeRepository.findById(anyLong()))
             .willReturn(Optional.of(recipe));
         given(likeRepository.findByMemberAndRecipe(any(), any()))
             .willReturn(Optional.empty());
 
         //when
         CustomException exception = assertThrows(CustomException.class, () ->
-            likeService.dislikeRecipe("recipeId", "memberEmail"));
+            likeService.dislikeRecipe(1L, "memberEmail"));
 
         //then
         assertEquals(ErrorCode.RECIPE_NOT_LIKED, exception.getError());

@@ -278,6 +278,7 @@ class MemberServiceTest {
     @DisplayName("비밀번호 초기화 키 발급 성공")
     void success_sendResetEmail() {
         //given
+        member.setStatus(MemberStatus.IN_USE);
         member.setPasswordResetKey("");
         member.setPasswordResetDue(LocalDateTime.now().minusDays(1));
         given(memberRepository.findById(anyString()))
@@ -313,7 +314,7 @@ class MemberServiceTest {
         CustomException exception = assertThrows(CustomException.class, () ->
             memberService.sendEmailToResetPassword("1"));
         //then
-        assertEquals(ErrorCode.ACCESS_NOT_VALID, exception.getError());
+        assertEquals(ErrorCode.EMAIL_NOT_AUTHENTICATED, exception.getError());
     }
 
     @Test

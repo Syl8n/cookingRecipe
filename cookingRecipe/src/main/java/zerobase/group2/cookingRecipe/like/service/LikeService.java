@@ -1,5 +1,6 @@
 package zerobase.group2.cookingRecipe.like.service;
 
+import java.time.LocalDateTime;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -18,22 +19,24 @@ import zerobase.group2.cookingRecipe.recipe.repository.RecipeRepository;
 @Service
 @RequiredArgsConstructor
 public class LikeService {
+
     private final LikeRepository likeRepository;
     private final MemberRepository memberRepository;
     private final RecipeRepository recipeRepository;
 
-    public LikeDto likeRecipe(String recipeId, String email) {
+    public LikeDto likeRecipe(long recipeId, String email) {
 
         Member member = getMemberById(email);
         Recipe recipe = getRecipeById(recipeId);
 
-        if(likeRepository.existsByMemberAndRecipe(member, recipe)){
+        if (likeRepository.existsByMemberAndRecipe(member, recipe)) {
             throw new CustomException(ErrorCode.RECIPE_ALREADY_LIKED);
         }
 
         LikeEntity like = likeRepository.save(LikeEntity.builder()
             .member(member)
             .recipe(recipe)
+            .createdAt(LocalDateTime.now())
             .build());
 
         recipe.setLikeCount(recipe.getLikeCount() + 1);
@@ -42,7 +45,7 @@ public class LikeService {
         return LikeDto.from(like);
     }
 
-    public LikeDto dislikeRecipe(String recipeId, String email) {
+    public LikeDto dislikeRecipe(long recipeId, String email) {
         Member member = getMemberById(email);
         Recipe recipe = getRecipeById(recipeId);
 
@@ -66,12 +69,12 @@ public class LikeService {
     }
 
     private void validateMember(Member member) {
-        if(member.getStatus() == MemberStatus.BEFORE_AUTH){
+        if (member.getStatus() == MemberStatus.BEFORE_AUTH) {
             throw new CustomException(ErrorCode.EMAIL_NOT_AUTHENTICATED);
         }
     }
 
-    private Recipe getRecipeById(String recipeId) {
+    private Recipe getRecipeById(long recipeId) {
         return recipeRepository.findById(recipeId)
             .orElseThrow(() -> new CustomException(ErrorCode.RECIPE_NOT_FOUND));
     }

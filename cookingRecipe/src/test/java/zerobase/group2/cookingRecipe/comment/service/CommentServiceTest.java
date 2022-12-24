@@ -56,7 +56,7 @@ class CommentServiceTest {
             .name("g2")
             .build();
         recipe = Recipe.builder()
-            .id(UUID.randomUUID().toString().replace("-", ""))
+            .visualId(UUID.randomUUID().toString().replace("-", ""))
             .title("recipe title")
             .mainImagePathBig("bigImagePath")
             .mainImagePathSmall("smallImagePath")
@@ -82,14 +82,14 @@ class CommentServiceTest {
         //given
         given(memberRepository.findById(anyString()))
             .willReturn(Optional.of(member));
-        given(recipeRepository.findById(anyString()))
+        given(recipeRepository.findById(anyLong()))
             .willReturn(Optional.of(recipe));
         given(commentRepository.save(any()))
             .willReturn(comment);
         ArgumentCaptor<Comment> captor = ArgumentCaptor.forClass(Comment.class);
 
         //when
-        commentService.writeComment("email", "recipeId", "text");
+        commentService.writeComment("email", 1, "text");
 
         //then
         verify(commentRepository).save(captor.capture());
@@ -108,7 +108,7 @@ class CommentServiceTest {
 
         //when
         CustomException exception = assertThrows(CustomException.class, () ->
-            commentService.writeComment("email", "recipeId", "text"));
+            commentService.writeComment("email", 1, "text"));
 
         //then
         assertEquals(ErrorCode.USER_NOT_FOUND, exception.getError());
@@ -120,12 +120,12 @@ class CommentServiceTest {
         //given
         given(memberRepository.findById(anyString()))
             .willReturn(Optional.of(member));
-        given(recipeRepository.findById(anyString()))
+        given(recipeRepository.findById(anyLong()))
             .willReturn(Optional.empty());
 
         //when
         CustomException exception = assertThrows(CustomException.class, () ->
-            commentService.writeComment("email", "recipeId", "text"));
+            commentService.writeComment("email", 1, "text"));
 
         //then
         assertEquals(ErrorCode.RECIPE_NOT_FOUND, exception.getError());

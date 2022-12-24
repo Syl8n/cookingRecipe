@@ -14,8 +14,8 @@ public class CommentInput {
     @Setter
     @AllArgsConstructor
     public static class Write {
-        @NotBlank
-        private String recipeId;
+        @NotNull
+        private Long recipeId;
         @NotBlank
         @Length(max = 500)
         private String text;
@@ -30,13 +30,5 @@ public class CommentInput {
         @NotBlank
         @Length(max = 500)
         private String text;
-    }
-
-    @Getter
-    @Setter
-    @AllArgsConstructor
-    public static class Delete {
-        @NotNull
-        private long commentId;
     }
 }

@@ -23,7 +23,7 @@ public class CommentService {
     private final MemberRepository memberRepository;
     private final RecipeRepository recipeRepository;
 
-    public CommentDto writeComment(String email, String recipeId, String text) {
+    public CommentDto writeComment(String email, long recipeId, String text) {
         Member member = getMemberById(email);
         Recipe recipe = getRecipeById(recipeId);
 
@@ -81,7 +81,7 @@ public class CommentService {
         }
     }
 
-    private Recipe getRecipeById(String recipeId) {
+    private Recipe getRecipeById(long recipeId) {
         return recipeRepository.findById(recipeId)
             .orElseThrow(() -> new CustomException(ErrorCode.RECIPE_NOT_FOUND));
     }

@@ -1,12 +1,23 @@
 package zerobase.group2.cookingRecipe.recipe.service;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Predicate;
+import javax.persistence.criteria.Root;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 import zerobase.group2.cookingRecipe.common.exception.CustomException;
 import zerobase.group2.cookingRecipe.common.type.ErrorCode;
 import zerobase.group2.cookingRecipe.member.entity.Member;
@@ -35,7 +46,7 @@ public class RecipeService {
 
         return RecipeDto.from(recipeRepository.save(
             Recipe.builder()
-                .id(UUID.randomUUID().toString().replace("-", ""))
+                .visualId(UUID.randomUUID().toString().replace("-", ""))
                 .title(title)
                 .mainImagePathBig(mainImagePathBig)
                 .mainImagePathSmall(mainImagePathSmall)
@@ -51,14 +62,51 @@ public class RecipeService {
         );
     }
 
-    public RecipeDto readRecipe(String recipeId, Cookie[] cookies, HttpServletResponse response) {
-        Recipe recipe = getRecipeById(recipeId);
+    public RecipeDto readRecipe(String visualId, Cookie[] cookies, HttpServletResponse response) {
+        Recipe recipe = getRecipeByVisualId(visualId);
         validateRecipe(recipe);
 
         Cookie cookie = findCookie(cookies);
         updateViews(recipe, cookie, response);
 
         return RecipeDto.from(recipe);
+    }
+
+    public Page<RecipeDto> findRecipesByQuery(String title, String type1, String type2, Pageable pageable){
+        if(!StringUtils.hasText(title) && !StringUtils.hasText(type1) && !StringUtils.hasText(type2)){
+            return findAllRecipes(pageable);
+        }
+        return new PageImpl<>(recipeRepository.findAll(createSpecificationFromQuery(title, type1, type2), pageable)
+            .stream().map(RecipeDto::from).collect(Collectors.toList()));
+    }
+
+    private Page<RecipeDto> findAllRecipes(Pageable pageable){
+        return new PageImpl<>(recipeRepository.findAll(pageable).stream()
+            .map(RecipeDto::from).collect(Collectors.toList()));
+    }
+
+    private Specification<Recipe> createSpecificationFromQuery(String title, String type1, String type2){
+        return new Specification<Recipe>() {
+            @Override
+            public Predicate toPredicate(Root<Recipe> root, CriteriaQuery<?> query,
+                CriteriaBuilder criteriaBuilder) {
+                List<Predicate> list = new ArrayList<>();
+                if(StringUtils.hasText(title)) {
+                    list.add(criteriaBuilder.like(root.get("title"), title));
+                }
+                if(StringUtils.hasText(type1)){
+                    list.add(criteriaBuilder.equal(root.get("type1"), type1));
+                }
+                if(StringUtils.hasText(type2)){
+                    list.add(criteriaBuilder.equal(root.get("type2"), type2));
+                }
+                Predicate finalPredicate = null;
+                for(int i = 1; i < list.size(); i++){
+                    finalPredicate = criteriaBuilder.and(list.get(i - 1), list.get(i));
+                }
+                return finalPredicate;
+            }
+        };
     }
 
     private Cookie findCookie(Cookie[] cookies){
@@ -73,14 +121,14 @@ public class RecipeService {
     }
 
     private void updateViews(Recipe recipe, Cookie cookie, HttpServletResponse response) {
-        if(cookie != null && cookie.getValue().contains("["+ recipe.getId() +"]")){
+        if(cookie != null && cookie.getValue().contains("["+ recipe.getVisualId() +"]")){
             return;
         }
 
         if(cookie == null){
-            cookie = new Cookie(COOKIE_NAME, "[" + recipe.getId() + "]");
-        } else if (!cookie.getValue().contains("["+ recipe.getId() +"]")){
-            cookie.setValue(cookie.getValue() + "_[" + recipe.getId() + "]");
+            cookie = new Cookie(COOKIE_NAME, "[" + recipe.getVisualId() + "]");
+        } else if (!cookie.getValue().contains("["+ recipe.getVisualId() +"]")){
+            cookie.setValue(cookie.getValue() + "_[" + recipe.getVisualId() + "]");
         }
 
         recipe.setViews(recipe.getViews() + 1);
@@ -91,17 +139,17 @@ public class RecipeService {
         response.addCookie(cookie);
     }
 
-    public String checkAuthorityToEditRecipe(String recipeId, String email) {
+    public String checkAuthorityToEditRecipe(String visualId, String email) {
         Member member = getUserById(email);
-        Recipe recipe = getRecipeById(recipeId);
+        Recipe recipe = getRecipeByVisualId(visualId);
 
         validateRecipe(recipe);
         validateEditor(member, recipe);
 
-        return recipe.getId();
+        return recipe.getVisualId();
     }
 
-    public RecipeDto processEditRecipe(String recipeId, String title, String mainImagePathSmall,
+    public RecipeDto processEditRecipe(Long recipeId, String title, String mainImagePathSmall,
         String mainImagePathBig, String type1, String type2, String ingredients,
         double kcal, List<String> manual, List<String> manualImagePath, String email) {
 
@@ -124,9 +172,9 @@ public class RecipeService {
         return RecipeDto.from(recipeRepository.save(recipe));
     }
 
-    public RecipeDto deleteRecipe(String recipeId, String email) {
+    public RecipeDto deleteRecipe(String visualId, String email) {
         Member member = getUserById(email);
-        Recipe recipe = getRecipeById(recipeId);
+        Recipe recipe = getRecipeByVisualId(visualId);
 
         validateRecipe(recipe);
         validateEditor(member, recipe);
@@ -164,8 +212,13 @@ public class RecipeService {
         }
     }
 
-    private Recipe getRecipeById(String recipeId) {
+    private Recipe getRecipeById(Long recipeId) {
         return recipeRepository.findById(recipeId)
+            .orElseThrow(() -> new CustomException(ErrorCode.RECIPE_NOT_FOUND));
+    }
+
+    private Recipe getRecipeByVisualId(String visualId) {
+        return recipeRepository.findByVisualId(visualId)
             .orElseThrow(() -> new CustomException(ErrorCode.RECIPE_NOT_FOUND));
     }
 
@@ -181,4 +234,5 @@ public class RecipeService {
             throw new CustomException(ErrorCode.EMAIL_NOT_AUTHENTICATED);
         }
     }
+
 }
