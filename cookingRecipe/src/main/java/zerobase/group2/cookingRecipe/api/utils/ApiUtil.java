@@ -9,6 +9,7 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.RestTemplate;
 import zerobase.group2.cookingRecipe.recipe.Entity.Recipe;
+import zerobase.group2.cookingRecipe.recipe.repository.RecipeRepository;
 
 public class ApiUtil {
 
@@ -20,13 +21,18 @@ public class ApiUtil {
     public static final String MANUAL = "MANUAL";
     public static final String MANUAL_IMG = "MANUAL_IMG";
 
-    public static List<Recipe> parseRecipe(JSONArray recipeJson) {
+    public static List<Recipe> parseRecipe(JSONArray recipeJson, RecipeRepository recipeRepository) {
         List<Recipe> list = new ArrayList<>();
         for (Object obj : recipeJson) {
             JSONObject jsonObject = (JSONObject) obj;
             List<String> manuals = fieldToList(jsonObject, MANUAL);
             List<String> manualImages = fieldToList(jsonObject, MANUAL_IMG);
-            list.add(Recipe.from(jsonObject, manuals, manualImages, COMPANY_EMAIL));
+
+            long recipeId = Long.parseLong((String) jsonObject.get("RCP_SEQ"));
+            Recipe recipe = recipeRepository.findById(recipeId)
+                .orElse(new Recipe(recipeId));
+            recipe.fill(jsonObject, manuals, manualImages, COMPANY_EMAIL);
+            list.add(recipe);
         }
         return list;
     }

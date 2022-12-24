@@ -17,7 +17,8 @@ import zerobase.group2.cookingRecipe.recipe.Entity.Recipe;
 @AllArgsConstructor
 @Builder
 public class RecipeDto {
-    private String id;
+    private Long id;
+    private String visualId;
     private String title;
     private String mainImagePathSmall;
     private String mainImagePathBig;
@@ -46,6 +47,7 @@ public class RecipeDto {
     public static RecipeDto from(Recipe recipe){
         return RecipeDto.builder()
             .id(recipe.getId())
+            .visualId(recipe.getVisualId())
             .title(recipe.getTitle())
             .mainImagePathSmall(recipe.getMainImagePathSmall())
             .mainImagePathBig(recipe.getMainImagePathBig())

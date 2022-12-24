@@ -4,6 +4,7 @@ import java.security.Principal;
 import javax.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -27,7 +28,7 @@ public class CommentController {
             input.getRecipeId(), input.getText()));
     }
 
-    @PutMapping("/{commentId}")
+    @PutMapping
     public ResponseResult updateComment(Principal principal,
         @RequestBody @Valid CommentInput.Update input) {
         return ResponseResult.ok(
@@ -37,8 +38,8 @@ public class CommentController {
 
     @DeleteMapping("/{commentId}")
     public ResponseResult deleteComment(Principal principal,
-        @RequestBody @Valid CommentInput.Delete input) {
+        @PathVariable long commentId) {
         return ResponseResult.ok(commentService.deleteComment(principal.getName(),
-            input.getCommentId()));
+            commentId));
     }
 }

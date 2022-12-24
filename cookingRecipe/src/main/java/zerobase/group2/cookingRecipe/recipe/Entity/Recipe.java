@@ -8,6 +8,8 @@ import javax.persistence.Column;
 import javax.persistence.Convert;
 import javax.persistence.Entity;
 import javax.persistence.EntityListeners;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.FetchType;
 import javax.persistence.Id;
 import javax.persistence.OneToMany;
@@ -34,29 +36,31 @@ import zerobase.group2.cookingRecipe.recipe.type.RecipeStatus;
 @Entity
 @EntityListeners(AuditingEntityListener.class)
 public class Recipe {
+
     @Id
-    private String id;
-    private Long seq;// RCP_SEQ
+    private Long id;// RCP_SEQ
+    private String visualId;
     private String title; // RCP_NM
     private String mainImagePathSmall; // ATT_FILE_NO_MAIN
     private String mainImagePathBig; // ATT_FILE_NO_MK
     private String type1; // RCP_WAY2
     private String type2; // RCP_PAT2
 
-    @Column(length=1000)
+    @Column(length = 1000)
     private String ingredients; // RCP_PARTS_DTLS
     private double kcal; // INFO_ENG
 
-    @Column(length=1000)
+    @Column(length = 1000)
     @Convert(converter = RecipeConverter.class)
     private List<String> manual;
 
-    @Column(length=1000)
+    @Column(length = 1000)
     @Convert(converter = RecipeConverter.class)
     private List<String> manualImagePath;
 
+    @Enumerated(EnumType.STRING)
     private RecipeStatus status;
-    private Long views;
+    private long views;
 
     private String email;
 
@@ -88,22 +92,23 @@ public class Recipe {
     private long totalScore;
     private long ratingCount;
 
-    public static Recipe from(JSONObject jsonObject, List<String> manual, List<String> manualImagePath,
-                                String user){
-        return Recipe.builder()
-            .id(UUID.randomUUID().toString().replace("-", ""))
-            .seq(Long.parseLong((String) jsonObject.get("RCP_SEQ")))
-            .title((String) jsonObject.get("RCP_NM"))
-            .mainImagePathSmall((String) jsonObject.get("ATT_FILE_NO_MAIN"))
-            .mainImagePathBig((String) jsonObject.get("ATT_FILE_NO_MK"))
-            .type1((String) jsonObject.get("RCP_WAY2"))
-            .type2((String) jsonObject.get("RCP_PAT2"))
-            .ingredients((String) jsonObject.get("RCP_PARTS_DTLS"))
-            .kcal(Double.parseDouble((String) jsonObject.get("INFO_ENG")))
-            .manual(manual)
-            .manualImagePath(manualImagePath)
-            .status(RecipeStatus.REGISTERED)
-            .email(user)
-            .build();
+    public Recipe(long id){
+        this.id = id;
+        this.visualId = UUID.randomUUID().toString().replace("-", "");
+    }
+
+    public void fill(JSONObject jsonObject, List<String> manual, List<String> manualImagePath,
+        String memberEmail) {
+        this.title = (String) jsonObject.get("RCP_NM");
+        this.mainImagePathSmall = (String) jsonObject.get("ATT_FILE_NO_MAIN");
+        this.mainImagePathBig = (String) jsonObject.get("ATT_FILE_NO_MK");
+        this.type1 = (String) jsonObject.get("RCP_WAY2");
+        this.type2 = (String) jsonObject.get("RCP_PAT2");
+        this.ingredients = (String) jsonObject.get("RCP_PARTS_DTLS");
+        this.kcal = Double.parseDouble((String) jsonObject.get("INFO_ENG"));
+        this.manual = manual;
+        this.manualImagePath = manualImagePath;
+        this.status = RecipeStatus.REGISTERED;
+        this.email = memberEmail;
     }
 }

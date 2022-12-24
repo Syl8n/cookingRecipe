@@ -18,23 +18,24 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import zerobase.group2.cookingRecipe.Security.authProvider.JwtProvider;
+import zerobase.group2.cookingRecipe.common.exception.CustomException;
+import zerobase.group2.cookingRecipe.common.type.ErrorCode;
 import zerobase.group2.cookingRecipe.member.entity.Member;
+import zerobase.group2.cookingRecipe.member.service.MemberService;
 
 @ExtendWith(SpringExtension.class)
 class JwtProviderTest {
 
     @Mock
-    UserDetailsService userDetailsService;
+    MemberService memberService;
 
     @InjectMocks
     JwtProvider jwtProvider;
@@ -75,6 +76,8 @@ class JwtProviderTest {
     void success_validateToken() {
         //given
         String token = generateToken(member, EXPIRE_TIME, SECRET_KEY);
+        given(memberService.getRefreshToken(anyString()))
+            .willReturn("refreshtoken");
 
         //when
         boolean result = jwtProvider.validateToken(token);
@@ -90,11 +93,11 @@ class JwtProviderTest {
         String token = generateToken(member, -EXPIRE_TIME, SECRET_KEY);
 
         //when
-        Exception exception = assertThrows(BadCredentialsException.class, () ->
+        CustomException exception = assertThrows(CustomException.class, () ->
             jwtProvider.validateToken(token));
 
         //then
-        assertEquals("만료된 토큰", exception.getMessage());
+        assertEquals(ErrorCode.TOKEN_NOT_VALID, exception.getError());
     }
 
     @Test
@@ -104,11 +107,11 @@ class JwtProviderTest {
         String token = generateToken(member, EXPIRE_TIME, "INVALIDKEY");
 
         //when
-        Exception exception = assertThrows(BadCredentialsException.class, () ->
+        CustomException exception = assertThrows(CustomException.class, () ->
             jwtProvider.validateToken(token));
 
         //then
-        assertEquals("잘못된 비밀키", exception.getMessage());
+        assertEquals(ErrorCode.TOKEN_NOT_VALID, exception.getError());
     }
 
     @Test
@@ -116,7 +119,7 @@ class JwtProviderTest {
     void success_getAuthentication() {
         //given
         String token = generateToken(member, EXPIRE_TIME, SECRET_KEY);
-        given(userDetailsService.loadUserByUsername(anyString()))
+        given(memberService.loadUserByUsername(anyString()))
             .willReturn(userDetails);
 
         //when

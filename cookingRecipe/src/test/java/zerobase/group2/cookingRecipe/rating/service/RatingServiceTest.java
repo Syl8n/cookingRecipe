@@ -3,6 +3,7 @@ package zerobase.group2.cookingRecipe.rating.service;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.verify;
@@ -56,7 +57,7 @@ class RatingServiceTest {
             .name("g2")
             .build();
         recipe = Recipe.builder()
-            .id(UUID.randomUUID().toString().replace("-", ""))
+            .visualId(UUID.randomUUID().toString().replace("-", ""))
             .title("recipe title")
             .mainImagePathBig("bigImagePath")
             .mainImagePathSmall("smallImagePath")
@@ -84,14 +85,14 @@ class RatingServiceTest {
         //given
         given(memberRepository.findById(anyString()))
             .willReturn(Optional.of(member));
-        given(recipeRepository.findById(anyString()))
+        given(recipeRepository.findById(anyLong()))
             .willReturn(Optional.of(recipe));
         given(ratingRepository.save(any()))
             .willReturn(rating);
         ArgumentCaptor<Rating> captor = ArgumentCaptor.forClass(Rating.class);
 
         //when
-        ratingService.rateRecipe("email", "recipeId", rating.getScore());
+        ratingService.rateRecipe("email", 1L, rating.getScore());
 
         //then
         verify(ratingRepository).save(captor.capture());
@@ -112,7 +113,7 @@ class RatingServiceTest {
 
         //when
         CustomException exception = assertThrows(CustomException.class, () ->
-            ratingService.rateRecipe("e", "r", 1));
+            ratingService.rateRecipe("e", 1L, 1));
 
         //then
         assertEquals(ErrorCode.USER_NOT_FOUND, exception.getError());
@@ -124,12 +125,12 @@ class RatingServiceTest {
         //given
         given(memberRepository.findById(anyString()))
             .willReturn(Optional.of(member));
-        given(recipeRepository.findById(anyString()))
+        given(recipeRepository.findById(anyLong()))
             .willReturn(Optional.empty());
 
         //when
         CustomException exception = assertThrows(CustomException.class, () ->
-            ratingService.rateRecipe("e", "r", 1));
+            ratingService.rateRecipe("e", 1L, 1));
 
         //then
         assertEquals(ErrorCode.RECIPE_NOT_FOUND, exception.getError());
@@ -141,7 +142,7 @@ class RatingServiceTest {
         //given
         given(memberRepository.findById(anyString()))
             .willReturn(Optional.of(member));
-        given(recipeRepository.findById(anyString()))
+        given(recipeRepository.findById(anyLong()))
             .willReturn(Optional.of(recipe));
         given(ratingRepository.findByMemberAndRecipe(any(), any()))
             .willReturn(Optional.of(rating));
@@ -150,7 +151,7 @@ class RatingServiceTest {
         ArgumentCaptor<Rating> captor = ArgumentCaptor.forClass(Rating.class);
 
         //when
-        ratingService.updateRateRecipe("email", "recipeId", 1);
+        ratingService.updateRateRecipe("email", 1L, 1);
 
         //then
         verify(ratingRepository).save(captor.capture());
@@ -170,7 +171,7 @@ class RatingServiceTest {
 
         //when
         CustomException exception = assertThrows(CustomException.class, () ->
-            ratingService.updateRateRecipe("e", "r", 1));
+            ratingService.updateRateRecipe("e", 1L, 1));
 
         //then
         assertEquals(ErrorCode.USER_NOT_FOUND, exception.getError());
@@ -182,12 +183,12 @@ class RatingServiceTest {
         //given
         given(memberRepository.findById(anyString()))
             .willReturn(Optional.of(member));
-        given(recipeRepository.findById(anyString()))
+        given(recipeRepository.findById(anyLong()))
             .willReturn(Optional.empty());
 
         //when
         CustomException exception = assertThrows(CustomException.class, () ->
-            ratingService.updateRateRecipe("e", "r", 1));
+            ratingService.updateRateRecipe("e", 1L, 1));
 
         //then
         assertEquals(ErrorCode.RECIPE_NOT_FOUND, exception.getError());
@@ -199,14 +200,14 @@ class RatingServiceTest {
         //given
         given(memberRepository.findById(anyString()))
             .willReturn(Optional.of(member));
-        given(recipeRepository.findById(anyString()))
+        given(recipeRepository.findById(anyLong()))
             .willReturn(Optional.of(recipe));
         given(ratingRepository.findByMemberAndRecipe(any(), any()))
             .willReturn(Optional.empty());
 
         //when
         CustomException exception = assertThrows(CustomException.class, () ->
-            ratingService.updateRateRecipe("e", "r", 1));
+            ratingService.updateRateRecipe("e", 1L, 1));
 
         //then
         assertEquals(ErrorCode.RATING_NOT_FOUND, exception.getError());

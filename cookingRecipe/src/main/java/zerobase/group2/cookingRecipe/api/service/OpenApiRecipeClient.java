@@ -19,7 +19,7 @@ public class OpenApiRecipeClient {
 
     public void getRecipeFromApi() {
         JSONArray recipeJson = ApiUtil.getRecipeString(apiKey);
-        List<Recipe> recipes = ApiUtil.parseRecipe(recipeJson);
+        List<Recipe> recipes = ApiUtil.parseRecipe(recipeJson, recipeRepository);
         recipeRepository.saveAll(recipes);
     }
 

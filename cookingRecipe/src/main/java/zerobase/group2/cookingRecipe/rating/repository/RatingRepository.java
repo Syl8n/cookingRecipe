@@ -11,4 +11,6 @@ import zerobase.group2.cookingRecipe.recipe.Entity.Recipe;
 @Repository
 public interface RatingRepository extends JpaRepository<Rating, MemberRecipeCompKey> {
     Optional<Rating> findByMemberAndRecipe(Member member, Recipe recipe);
+
+    boolean existsByMemberAndRecipe(Member member, Recipe recipe);
 }
