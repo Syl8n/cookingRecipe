@@ -1,35 +1,42 @@
 package zerobase.group2.cookingRecipe.recipe.service;
 
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
-import java.util.stream.Collectors;
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Predicate;
-import javax.persistence.criteria.Root;
-import javax.servlet.http.Cookie;
-import javax.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
+import zerobase.group2.cookingRecipe.comment.dto.CommentDto;
+import zerobase.group2.cookingRecipe.comment.entity.Comment;
+import zerobase.group2.cookingRecipe.comment.repository.CommentRepository;
 import zerobase.group2.cookingRecipe.common.exception.CustomException;
 import zerobase.group2.cookingRecipe.common.type.ErrorCode;
+import zerobase.group2.cookingRecipe.like.repository.LikeRepository;
 import zerobase.group2.cookingRecipe.member.entity.Member;
 import zerobase.group2.cookingRecipe.member.repository.MemberRepository;
 import zerobase.group2.cookingRecipe.member.type.MemberStatus;
+import zerobase.group2.cookingRecipe.rating.repository.RatingRepository;
 import zerobase.group2.cookingRecipe.recipe.Entity.Recipe;
 import zerobase.group2.cookingRecipe.recipe.dto.RecipeDto;
 import zerobase.group2.cookingRecipe.recipe.repository.RecipeRepository;
 import zerobase.group2.cookingRecipe.recipe.type.RecipeStatus;
 
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Predicate;
+import javax.persistence.criteria.Root;
+import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServletResponse;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
+import java.util.stream.Collectors;
+
 @Service
 @RequiredArgsConstructor
+@Transactional
 public class RecipeService {
 
     public static final String DELETED_RECIPE_TITLE = "삭제된 레시피";
@@ -37,6 +44,9 @@ public class RecipeService {
     public static final String COOKIE_NAME = "recipeView";
     private final RecipeRepository recipeRepository;
     private final MemberRepository memberRepository;
+    private final CommentRepository commentRepository;
+    private final LikeRepository likeRepository;
+    private final RatingRepository ratingRepository;
 
     public RecipeDto createRecipe(String title, String mainImagePathSmall,
         String mainImagePathBig, String type1, String type2, String ingredients,
@@ -179,19 +189,12 @@ public class RecipeService {
         validateRecipe(recipe);
         validateEditor(member, recipe);
 
-        recipe.setTitle(DELETED_RECIPE_TITLE);
-        recipe.setStatus(RecipeStatus.UNREGISTERED);
-        recipe.setDeletedAt(LocalDateTime.now());
-        recipe.setMainImagePathSmall("");
-        recipe.setMainImagePathBig("");
-        recipe.setType1("");
-        recipe.setType2("");
-        recipe.setIngredients("");
-        recipe.setKcal(0);
-        recipe.setManual(null);
-        recipe.setManualImagePath(null);
+        likeRepository.deleteAllByRecipe(recipe);
+        commentRepository.deleteAllByRecipe(recipe);
+        ratingRepository.deleteAllByRecipe(recipe);
+        recipeRepository.delete(recipe);
 
-        return RecipeDto.from(recipeRepository.save(recipe));
+        return RecipeDto.from(recipe);
     }
 
     private static void validateRecipe(Recipe recipe) {
@@ -207,7 +210,7 @@ public class RecipeService {
     }
 
     private void validateEditor(Member member, Recipe recipe) {
-        if (!member.getEmail().equals(recipe.getEmail())) {
+        if (!member.getEmail().equals(recipe.getEmail()) && !member.getRoles().contains("ROLE_ADMIN")) {
             throw new CustomException(ErrorCode.USER_NOT_EDITOR);
         }
     }
@@ -235,4 +238,13 @@ public class RecipeService {
         }
     }
 
+    public List<CommentDto> getComments(String visualId) {
+        Recipe recipe = getRecipeByVisualId(visualId);
+
+        List<Comment> commentList = commentRepository.findAllByRecipe(recipe);
+
+        return commentList.stream()
+                .map(CommentDto::from)
+                .collect(Collectors.toList());
+    }
 }

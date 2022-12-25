@@ -40,4 +40,8 @@ public class LikeEntity {
     private Recipe recipe;
 
     private LocalDateTime createdAt;
+
+    public static LikeEntity getLike(LikeEntity likeEntity){
+        return likeEntity;
+    }
 }

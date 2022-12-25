@@ -1,16 +1,5 @@
 package zerobase.group2.cookingRecipe.member.service;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.BDDMockito.given;
-
-import java.time.LocalDateTime;
-import java.util.Optional;
-import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -21,16 +10,31 @@ import org.springframework.security.crypto.bcrypt.BCrypt;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import zerobase.group2.cookingRecipe.common.exception.CustomException;
 import zerobase.group2.cookingRecipe.common.type.ErrorCode;
+import zerobase.group2.cookingRecipe.like.repository.LikeRepository;
 import zerobase.group2.cookingRecipe.member.component.MailComponent;
 import zerobase.group2.cookingRecipe.member.dto.MemberDto;
 import zerobase.group2.cookingRecipe.member.entity.Member;
 import zerobase.group2.cookingRecipe.member.repository.MemberRepository;
 import zerobase.group2.cookingRecipe.member.type.MemberStatus;
+import zerobase.group2.cookingRecipe.recipe.repository.RecipeRepository;
+
+import java.time.LocalDateTime;
+import java.util.Optional;
+import java.util.UUID;
+
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.BDDMockito.given;
 
 @ExtendWith(SpringExtension.class)
 class MemberServiceTest {
     @Mock
     private MemberRepository memberRepository;
+    @Mock
+    private LikeRepository likeRepository;
+    @Mock
+    private RecipeRepository recipeRepository;
 
     @Mock
     private MailComponent mailComponent;
@@ -330,7 +334,6 @@ class MemberServiceTest {
 
         //then
         assertEquals(member.getEmail(), email);
-        assertEquals("", member.getPasswordResetKey());
         assertTrue(LocalDateTime.now().plusMinutes(1).isAfter(member.getPasswordResetDue()));
     }
 
@@ -363,11 +366,12 @@ class MemberServiceTest {
     @DisplayName("비밀번호 초기화 성공")
     void success_resetProcess() {
         //given
+        member.setPasswordResetKey("key");
         member.setPassword("1111");
         given(memberRepository.findById(anyString()))
             .willReturn(Optional.of(member));
         //when
-        memberService.processResetPassword("1", "1111");
+        memberService.processResetPassword("1", "1111", "key");
         //then
         assertNotEquals("1111", member.getPassword());
     }
@@ -378,7 +382,7 @@ class MemberServiceTest {
         //given
         //when
         CustomException exception = assertThrows(CustomException.class, () ->
-            memberService.processResetPassword("1", "1111"));
+            memberService.processResetPassword("1", "1111", "key"));
         //then
         assertEquals(ErrorCode.USER_NOT_FOUND, exception.getError());
     }

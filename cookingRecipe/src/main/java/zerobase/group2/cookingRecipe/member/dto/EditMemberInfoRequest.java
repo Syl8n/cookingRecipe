@@ -5,15 +5,10 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
 
-public class EditMemberInfo {
-
-    @Getter
-    @Setter
-    @AllArgsConstructor
-    public static class Request {
-
-        @NotBlank
-        private String name;
-    }
-
+@Getter
+@Setter
+@AllArgsConstructor
+public class EditMemberInfoRequest {
+    @NotBlank
+    private String name;
 }

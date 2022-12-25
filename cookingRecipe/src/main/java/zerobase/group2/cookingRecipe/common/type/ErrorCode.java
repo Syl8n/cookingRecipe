@@ -18,7 +18,8 @@ public enum ErrorCode {
     RATING_NOT_FOUND("평점 정보가 존재하지 않습니다."),
     EMAIL_NOT_AUTHENTICATED("이메일 인증이 되지 않았습니다."),
     TOKEN_NOT_VALID("유효하지 않은 토큰입니다."),
-    RECIPE_ALREADY_RATED("이미 평가한 레시피입니다.")
+    RECIPE_ALREADY_RATED("이미 평가한 레시피입니다."),
+    INTERNAL_SERVER_ERROR("서버 내부 오류입니다.")
 ;
     private final String description;
 }

@@ -45,4 +45,8 @@ public class Rating {
 
     @LastModifiedDate
     private LocalDateTime updatedAt;
+
+    public static Rating getRating(Rating rating){
+        return rating;
+    }
 }

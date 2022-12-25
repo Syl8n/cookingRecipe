@@ -76,9 +76,9 @@ public class Member implements UserDetails {
     private List<Comment> commentList;
 
     @OneToMany(mappedBy = "member",
-        cascade = CascadeType.ALL,
-        orphanRemoval = true,
-        fetch = FetchType.LAZY)
+            cascade = CascadeType.ALL,
+            orphanRemoval = true,
+            fetch = FetchType.LAZY)
     private List<Rating> ratingList;
 
     public boolean validatePassword(String pw) {

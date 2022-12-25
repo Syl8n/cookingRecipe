@@ -4,6 +4,7 @@ import java.time.LocalDateTime;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import zerobase.group2.cookingRecipe.common.exception.CustomException;
 import zerobase.group2.cookingRecipe.common.type.ErrorCode;
 import zerobase.group2.cookingRecipe.member.entity.Member;
@@ -18,6 +19,7 @@ import zerobase.group2.cookingRecipe.recipe.repository.RecipeRepository;
 @Slf4j
 @Service
 @RequiredArgsConstructor
+@Transactional
 public class RatingService {
     private final RatingRepository ratingRepository;
     private final MemberRepository memberRepository;

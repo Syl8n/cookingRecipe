@@ -3,6 +3,7 @@ package zerobase.group2.cookingRecipe.comment.service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import zerobase.group2.cookingRecipe.comment.dto.CommentDto;
 import zerobase.group2.cookingRecipe.comment.entity.Comment;
 import zerobase.group2.cookingRecipe.comment.repository.CommentRepository;
@@ -17,6 +18,7 @@ import zerobase.group2.cookingRecipe.recipe.repository.RecipeRepository;
 @Slf4j
 @Service
 @RequiredArgsConstructor
+@Transactional
 public class CommentService {
 
     private final CommentRepository commentRepository;
