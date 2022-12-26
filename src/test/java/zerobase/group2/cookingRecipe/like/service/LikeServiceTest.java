@@ -1,16 +1,5 @@
 package zerobase.group2.cookingRecipe.like.service;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.verify;
-
-import java.util.Arrays;
-import java.util.Optional;
-import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -28,6 +17,16 @@ import zerobase.group2.cookingRecipe.member.repository.MemberRepository;
 import zerobase.group2.cookingRecipe.recipe.Entity.Recipe;
 import zerobase.group2.cookingRecipe.recipe.repository.RecipeRepository;
 import zerobase.group2.cookingRecipe.recipe.type.RecipeStatus;
+
+import java.util.Arrays;
+import java.util.Optional;
+import java.util.UUID;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.verify;
 
 @ExtendWith(SpringExtension.class)
 class LikeServiceTest {
@@ -155,13 +154,13 @@ class LikeServiceTest {
         //given
         given(memberRepository.findById(anyString()))
             .willReturn(Optional.of(member));
-        given(recipeRepository.findById(anyLong()))
+        given(recipeRepository.findByVisualId(anyString()))
             .willReturn(Optional.of(recipe));
         given(likeRepository.findByMemberAndRecipe(any(), any()))
             .willReturn(Optional.of(like));
 
         //when
-        likeService.dislikeRecipe(1L, "memberEmail");
+        likeService.dislikeRecipe("11", "memberEmail");
 
         //then
         verify(likeRepository).delete(like);
@@ -178,7 +177,7 @@ class LikeServiceTest {
 
         //when
         CustomException exception = assertThrows(CustomException.class, () ->
-            likeService.dislikeRecipe(1L, "memberEmail"));
+            likeService.dislikeRecipe("11", "memberEmail"));
 
         //then
         assertEquals(ErrorCode.USER_NOT_FOUND, exception.getError());
@@ -190,12 +189,12 @@ class LikeServiceTest {
         //given
         given(memberRepository.findById(anyString()))
             .willReturn(Optional.of(member));
-        given(recipeRepository.findById(anyLong()))
+        given(recipeRepository.findByVisualId(anyString()))
             .willReturn(Optional.empty());
 
         //when
         CustomException exception = assertThrows(CustomException.class, () ->
-            likeService.dislikeRecipe(1L, "memberEmail"));
+            likeService.dislikeRecipe("11", "memberEmail"));
 
         //then
         assertEquals(ErrorCode.RECIPE_NOT_FOUND, exception.getError());
@@ -207,14 +206,14 @@ class LikeServiceTest {
         //given
         given(memberRepository.findById(anyString()))
             .willReturn(Optional.of(member));
-        given(recipeRepository.findById(anyLong()))
+        given(recipeRepository.findByVisualId(anyString()))
             .willReturn(Optional.of(recipe));
         given(likeRepository.findByMemberAndRecipe(any(), any()))
             .willReturn(Optional.empty());
 
         //when
         CustomException exception = assertThrows(CustomException.class, () ->
-            likeService.dislikeRecipe(1L, "memberEmail"));
+            likeService.dislikeRecipe("11", "memberEmail"));
 
         //then
         assertEquals(ErrorCode.RECIPE_NOT_LIKED, exception.getError());

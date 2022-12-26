@@ -40,7 +40,7 @@ public class MemberController {
     @PutMapping("/info")
     @ApiOperation("회원 정보를 수정합니다. 현재는 닉네임 정도 밖에 수정할 게 없습니다")
     public ResponseResult editMemberInfo(Principal principal,
-        @RequestBody @Valid @ApiParam("닉네임") EditMemberInfoRequest request) {
+        @RequestBody @Valid EditMemberInfoRequest request) {
         MemberDto memberDto = memberService.editMemberInfo(principal.getName(), request.getName());
         return ResponseResult.ok(memberDto);
     }
@@ -48,7 +48,7 @@ public class MemberController {
     @PutMapping("/edit-password")
     @ApiOperation("비밀번호를 변경합니다")
     public ResponseResult editPassword(Principal principal,
-        @RequestBody @Valid @ApiParam("이전 비밀번호, 새 비밀번호") EditPasswordRequest request) {
+        @RequestBody @Valid EditPasswordRequest request) {
         memberService.editPassword(principal.getName(),
             request.getOldPassword(), request.getNewPassword());
         return ResponseResult.ok(true);

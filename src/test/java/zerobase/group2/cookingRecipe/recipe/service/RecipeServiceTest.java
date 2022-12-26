@@ -1,18 +1,5 @@
 package zerobase.group2.cookingRecipe.recipe.service;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.verify;
-
-import java.util.*;
-import javax.servlet.http.Cookie;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -34,6 +21,17 @@ import zerobase.group2.cookingRecipe.recipe.dto.RecipeInput;
 import zerobase.group2.cookingRecipe.recipe.dto.RecipeInput.Request;
 import zerobase.group2.cookingRecipe.recipe.repository.RecipeRepository;
 import zerobase.group2.cookingRecipe.recipe.type.RecipeStatus;
+
+import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.util.*;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.verify;
 
 @ExtendWith(SpringExtension.class)
 class RecipeServiceTest {
@@ -84,7 +82,8 @@ class RecipeServiceTest {
                 "삼겹살",
                 300.0,
                 Arrays.asList("판을 달군다", "고기를 꺼낸다", "굽는다"),
-                Arrays.asList("manualImage1", "manualImage2", "manualImage3")
+                Arrays.asList("manualImage1", "manualImage2", "manualImage3"),
+                null
         );
         recipe = Recipe.builder()
                 .id(1L)
@@ -374,7 +373,8 @@ class RecipeServiceTest {
                 500.0,
                 Arrays.asList("edited 판을 달군다", "고기를 꺼낸다", "굽는다"),
                 Arrays.asList("edited manualImage1", "manualImage2",
-                        "manualImage3")
+                        "manualImage3"),
+                recipe.getId()
         );
 
         //when

@@ -6,6 +6,7 @@ import io.swagger.annotations.ApiParam;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 import zerobase.group2.cookingRecipe.common.model.ResponseResult;
+import zerobase.group2.cookingRecipe.like.dto.LikeRequest;
 import zerobase.group2.cookingRecipe.like.service.LikeService;
 
 import java.security.Principal;
@@ -18,21 +19,20 @@ public class LikeController {
 
     private final LikeService likeService;
 
-    @PostMapping("/{recipeId}")
+    @PostMapping()
     @ApiOperation("해당 레시피를 찜 목록에 등록합니다")
-    public ResponseResult likeRecipe(@PathVariable
-                                     @ApiParam("레시피 ID. 테스트용으로 1~200 가능합니다")
-                                     long recipeId, Principal principal) {
+    public ResponseResult likeRecipe(@RequestBody LikeRequest request,
+                                     Principal principal) {
         return ResponseResult.ok(
-                likeService.likeRecipe(recipeId, principal.getName()));
+                likeService.likeRecipe(request.getRecipeId(), principal.getName()));
     }
 
-    @DeleteMapping("/{recipeId}")
+    @DeleteMapping("/{visualId}")
     @ApiOperation("해당 레시피를 찜 목록에서 삭제합니다")
     public ResponseResult dislikeRecipe(@PathVariable
-                                        @ApiParam("레시피 ID. 테스트용으로 1~200 가능합니다")
-                                        long recipeId, Principal principal) {
+                                        @ApiParam("문자열 ID")
+                                        String visualId, Principal principal) {
         return ResponseResult.ok(
-                likeService.dislikeRecipe(recipeId, principal.getName()));
+                likeService.dislikeRecipe(visualId, principal.getName()));
     }
 }

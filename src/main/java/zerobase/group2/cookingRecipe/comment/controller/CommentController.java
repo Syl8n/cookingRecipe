@@ -1,8 +1,5 @@
 package zerobase.group2.cookingRecipe.comment.controller;
 
-import java.security.Principal;
-import javax.validation.Valid;
-
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
@@ -11,6 +8,9 @@ import org.springframework.web.bind.annotation.*;
 import zerobase.group2.cookingRecipe.comment.dto.CommentInput;
 import zerobase.group2.cookingRecipe.comment.service.CommentService;
 import zerobase.group2.cookingRecipe.common.model.ResponseResult;
+
+import javax.validation.Valid;
+import java.security.Principal;
 
 @RestController
 @RequiredArgsConstructor
@@ -23,8 +23,7 @@ public class CommentController {
     @PostMapping
     @ApiOperation("댓글을 작성합니다")
     public ResponseResult writeComment(Principal principal,
-        @RequestBody @Valid
-        @ApiParam("레시피 ID (테스트용 1~200), 댓글 텍스트") CommentInput.Write input) {
+        @RequestBody @Valid CommentInput.Write input) {
         return ResponseResult.ok(commentService.writeComment(principal.getName(),
             input.getRecipeId(), input.getText()));
     }
@@ -32,8 +31,7 @@ public class CommentController {
     @PutMapping
     @ApiOperation("댓글을 수정합니다")
     public ResponseResult updateComment(Principal principal,
-        @RequestBody @Valid
-        @ApiParam("코멘트 ID, 댓글 텍스트") CommentInput.Update input) {
+        @RequestBody @Valid CommentInput.Update input) {
         return ResponseResult.ok(
             commentService.updateComment(principal.getName(), input.getCommentId(),
                 input.getText()));

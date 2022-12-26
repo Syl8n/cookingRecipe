@@ -1,16 +1,14 @@
 package zerobase.group2.cookingRecipe.member.dto;
 
-import java.time.LocalDateTime;
-import java.util.List;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import io.swagger.annotations.ApiModelProperty;
+import lombok.*;
 import zerobase.group2.cookingRecipe.comment.entity.Comment;
 import zerobase.group2.cookingRecipe.like.entity.LikeEntity;
 import zerobase.group2.cookingRecipe.member.entity.Member;
 import zerobase.group2.cookingRecipe.rating.Entity.Rating;
+
+import java.time.LocalDateTime;
+import java.util.List;
 
 @Getter
 @Setter
@@ -18,9 +16,14 @@ import zerobase.group2.cookingRecipe.rating.Entity.Rating;
 @AllArgsConstructor
 @Builder
 public class MemberDto {
+
+    @ApiModelProperty("회원 ID")
     private String email;
+    @ApiModelProperty("회원 닉네임")
     private String name;
+    @ApiModelProperty("회원 가입일")
     private LocalDateTime registeredAt;
+    @ApiModelProperty("회원 정보 수정일")
     private LocalDateTime updatedAt;
     private List<LikeEntity> likeEntityList;
     private List<Comment> commentList;

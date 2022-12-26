@@ -20,7 +20,7 @@ import java.util.stream.Collectors;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/auth")
-@Api(value = "인증용 api")
+@Api(value = "인증용 api", tags = {"JWT를 필요로하지 않습니다"})
 public class AuthController {
 
     private final MemberService memberService;
@@ -29,7 +29,6 @@ public class AuthController {
     @PostMapping("/register")
     @ApiOperation(value = "회원가입을 해 DB에 정보를 입력합니다")
     public ResponseResult register(@RequestBody @Valid
-                                   @ApiParam("이메일, 비밀번호, 닉네임")
                                    RegisterRequest request) {
         MemberDto memberDto = memberService.register(
                 request.getEmail(),
@@ -42,7 +41,7 @@ public class AuthController {
     @PostMapping("/login")
     @ApiOperation(value = "로그인을 해 JWT를 발행합니다")
     public ResponseResult login(@RequestBody @Valid
-                                @ApiParam("이메일, 비밀번호") LoginRequest request) {
+                                LoginRequest request) {
         Member member = memberService.authenticate(request.getUsername(), request.getPassword());
         JwtIssue jwtIssue = jwtProvider.generateTokens(member.getUsername(), member.getRoles());
         memberService.putRefreshToken(member.getUsername(), jwtIssue.getRefreshToken());
@@ -51,8 +50,7 @@ public class AuthController {
 
     @PostMapping("/reissue")
     @ApiOperation(value = "토큰 만료 시 재발행용 API입니다")
-    public ResponseResult reissue(@RequestBody @Valid
-                                      @ApiParam("엑세스용 토큰, 재발행용 토큰") JwtIssue request) {
+    public ResponseResult reissue(@RequestBody @Valid JwtIssue request) {
         if (!jwtProvider.validateRefreshToken(request.getRefreshToken())) {
             throw new CustomException(ErrorCode.TOKEN_NOT_VALID);
         }
@@ -92,8 +90,7 @@ public class AuthController {
     @ApiOperation(value = "비밀번호를 초기화합니다",
             notes = "초기화용 key가 일치하지 않으면 예외 발생하므로 메일 송신부터 해야 확인 가능합니다")
     public ResponseResult resetPasswordProceeding(
-            @RequestBody @Valid
-            @ApiParam("이메일, 인증키, 새 비밀번호") ResetPasswordRequest request) {
+            @RequestBody @Valid ResetPasswordRequest request) {
         memberService.processResetPassword(request.getEmail(), request.getNewPassword(), request.getKey());
         return ResponseResult.ok(true);
     }

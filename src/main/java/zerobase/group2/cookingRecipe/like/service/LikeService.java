@@ -1,6 +1,5 @@
 package zerobase.group2.cookingRecipe.like.service;
 
-import java.time.LocalDateTime;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -15,6 +14,8 @@ import zerobase.group2.cookingRecipe.member.repository.MemberRepository;
 import zerobase.group2.cookingRecipe.member.type.MemberStatus;
 import zerobase.group2.cookingRecipe.recipe.Entity.Recipe;
 import zerobase.group2.cookingRecipe.recipe.repository.RecipeRepository;
+
+import java.time.LocalDateTime;
 
 @Slf4j
 @Service
@@ -47,9 +48,10 @@ public class LikeService {
         return LikeDto.from(like);
     }
 
-    public LikeDto dislikeRecipe(long recipeId, String email) {
+    public LikeDto dislikeRecipe(String visualid, String email) {
         Member member = getMemberById(email);
-        Recipe recipe = getRecipeById(recipeId);
+        Recipe recipe = recipeRepository.findByVisualId(visualid)
+                .orElseThrow(() -> new CustomException(ErrorCode.RECIPE_NOT_FOUND));
 
         LikeEntity like = likeRepository.findByMemberAndRecipe(member, recipe)
             .orElseThrow(() -> new CustomException(ErrorCode.RECIPE_NOT_LIKED));
