@@ -20,11 +20,19 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
     private final JwtAuthFilter jwtAuthFilter;
 
-    private static final String[] AUTH_WHITELIST = {
+    private static final String[] AUTH_IGNORELIST = {
             "/swagger-resources/**",
             "/swagger-ui/**",
             "/v2/api-docs",
             "/webjars/**"
+    };
+
+    private static final String[] AUTH_WHITELIST = {
+            "/auth/**",
+            "/api",
+            "/recipe/read/**",
+            "/recipe/find",
+            "/recipe/comments/**"
     };
 
     @Bean
@@ -35,7 +43,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
     @Override
     public void configure(WebSecurity web) throws Exception {
-        web.ignoring().antMatchers(AUTH_WHITELIST);
+        web.ignoring().antMatchers(AUTH_IGNORELIST);
     }
 
     @Override
@@ -46,7 +54,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
             .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
             .and()
             .authorizeRequests()
-            .antMatchers("/auth/**", "/api", "/recipe/read/**", "/recipe/find", "/recipe/comments/**").permitAll()
+            .antMatchers(AUTH_WHITELIST).permitAll()
             .antMatchers("/admin/**").hasRole(MemberRole.ADMIN)
             .anyRequest().hasAnyRole(MemberRole.USER, MemberRole.ADMIN)
             .and()

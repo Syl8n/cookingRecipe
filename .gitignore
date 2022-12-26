@@ -41,4 +41,4 @@ out/
 *.yml
 *.properties
 
-DockerFile
+Dockerfile
