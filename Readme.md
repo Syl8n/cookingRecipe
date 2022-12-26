@@ -8,11 +8,11 @@
 
 ## Getting Started
 
-[Access to the website](http://ec2-54-180-109-193.ap-northeast-2.compute.amazonaws.com/)
+[Access to the website](http://ec2-54-180-109-193.ap-northeast-2.compute.amazonaws.com/){:target="_blank"}
 
 ## Project Proposal
 
-[기획서](https://www.notion.so/15cc5f1e382f4054a9ab0ec2517753b2/)
+[기획서](https://www.notion.so/15cc5f1e382f4054a9ab0ec2517753b2/){:target="_blank"}
 
 ## Tech Stack
 
@@ -32,8 +32,8 @@ Docker
 
 ## Built With
 
-* [식품의약품안전처]([http://www.dropwizard.io/1.0.2/docs/](http://www.foodsafetykorea.go.kr/api/openApiInfo.do?menu_grp=MENU_GRP31&menu_no=661&show_cnt=10&start_idx=1&svc_no=COOKRCP01)) - 공공 요리 레시피 사용
-* [Maven](https://maven.apache.org/) - 의존성 관리
+* [식품의약품안전처](http://www.foodsafetykorea.go.kr/api/openApiInfo.do?menu_grp=MENU_GRP31&menu_no=661&show_cnt=10&start_idx=1&svc_no=COOKRCP01){:target="_blank"} - 공공 요리 레시피 사용
+* [Maven](https://maven.apache.org/){:target="_blank"} - 의존성 관리
 
 ## Authors
 
