@@ -32,7 +32,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
             "/api",
             "/recipe/read/**",
             "/recipe/find",
-            "/recipe/comments/**"
+            "/recipe/comments/**",
+            "/"
     };
 
     @Bean
