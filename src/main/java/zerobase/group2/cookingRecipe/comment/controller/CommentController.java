@@ -15,7 +15,7 @@ import java.security.Principal;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/comments")
-@Api("댓글용 api")
+@Api(tags = {"댓글용 api"})
 public class CommentController {
 
     private final CommentService commentService;

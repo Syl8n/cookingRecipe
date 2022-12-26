@@ -23,6 +23,7 @@ import java.util.UUID;
 public class Recipe {
 
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id; // RCP_SEQ
     private String visualId;
     private String title; // RCP_NM

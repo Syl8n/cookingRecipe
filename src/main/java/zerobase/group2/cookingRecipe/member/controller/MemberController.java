@@ -18,7 +18,7 @@ import java.util.List;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/member")
-@Api("회원용 api")
+@Api(tags = {"회원 정보(개인 정보, 찜 정보)를 중점으로 다루는 api"})
 public class MemberController {
 
     private final MemberService memberService;

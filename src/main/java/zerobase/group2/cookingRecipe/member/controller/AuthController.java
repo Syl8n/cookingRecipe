@@ -20,7 +20,7 @@ import java.util.stream.Collectors;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/auth")
-@Api(value = "인증용 api", tags = {"JWT를 필요로하지 않습니다"})
+@Api(tags = {"인증용 api (JWT를 필요로하지 않습니다)"})
 public class AuthController {
 
     private final MemberService memberService;

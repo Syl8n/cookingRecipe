@@ -14,7 +14,7 @@ import java.security.Principal;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/rating")
-@Api("평점 부여 api")
+@Api(tags = {"평점 부여/수정 api"})
 public class RatingController {
 
     private final RatingService ratingService;

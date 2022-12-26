@@ -14,7 +14,7 @@ import java.security.Principal;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/likes")
-@Api("찜 추가/제거용 api")
+@Api(tags = {"찜 추가/제거용 api"})
 public class LikeController {
 
     private final LikeService likeService;

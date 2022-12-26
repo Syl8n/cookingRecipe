@@ -29,7 +29,7 @@ public class SwaggerConfig {
                 .title("COOKING RECIPE")
                 .description("요리 레시피를 등록 및 공유합니다" +
                         "\n이메일 인증 하지 않으면 서비스가 제대로 동작하지 않습니다" +
-                        "\n테스트용으론 zb@zerobase.com / 1234 이용하시면 됩니다" +
+                        "\n테스트용 계정으론 zb@zerobase.com / 1234 이용하시면 됩니다" +
                         "\nJWT 방식 인증 사용하고 있습니다")
                 .version("v1.0")
                 .build();

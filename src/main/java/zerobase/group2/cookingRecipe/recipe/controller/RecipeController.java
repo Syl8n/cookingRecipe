@@ -21,7 +21,7 @@ import java.util.List;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/recipe")
-@Api("레시피 관련 api입니다")
+@Api(tags = {"레시피 관련 api"})
 public class RecipeController {
 
     private final RecipeService recipeService;
